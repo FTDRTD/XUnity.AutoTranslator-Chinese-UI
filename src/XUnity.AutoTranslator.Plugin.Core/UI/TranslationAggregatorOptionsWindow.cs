@@ -38,7 +38,7 @@ namespace XUnity.AutoTranslator.Plugin.Core.UI
       {
          GUI.Box( _windowRect, GUIUtil.none, GUIUtil.GetWindowBackgroundStyle() );
 
-         _windowRect = GUI.Window( WindowId, _windowRect, (GUI.WindowFunction)CreateWindowUI, "---- Translation Aggregator Options ----" );
+         _windowRect = GUI.Window( WindowId, _windowRect, (GUI.WindowFunction)CreateWindowUI, "---- 翻译聚合器选项 ----" );
 
          if( GUIUtil.IsAnyMouseButtonOrScrollWheelDownSafe )
          {
@@ -70,7 +70,7 @@ namespace XUnity.AutoTranslator.Plugin.Core.UI
                IsShown = false;
             }
 
-            GUILayout.Label( "Available Translators" );
+            GUILayout.Label( "可用翻译" );
 
             // GROUP
             _scrollPosition = GUILayout.BeginScrollView( _scrollPosition, GUI.skin.box );
@@ -93,12 +93,12 @@ namespace XUnity.AutoTranslator.Plugin.Core.UI
             GUILayout.EndScrollView();
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label( "Height" );
+            GUILayout.Label( "高度" );
             _viewModel.Height = Mathf.Round( GUILayout.HorizontalSlider( _viewModel.Height, 50, 300, GUILayout.MaxWidth( 250 ) ) );
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label( "Width" );
+            GUILayout.Label( "宽度" );
             _viewModel.Width = Mathf.Round( GUILayout.HorizontalSlider( _viewModel.Width, 200, 1000, GUILayout.MaxWidth( 250 ) ) );
             GUILayout.EndHorizontal();
 
