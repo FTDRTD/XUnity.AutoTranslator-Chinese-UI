@@ -1,773 +1,753 @@
-﻿# XUnity Auto Translator
+# XUnity 自动翻译器
+## 目录
+- [介绍](#介绍)
+- [插件框架](#插件框架)
+- [安装](#安装)
+- [按键映射](#按键映射)
+- [翻译器](#翻译器)
+- [文本框架](#文本框架)
+- [配置](#配置)
+- [IL2CPP 支持](#il2cpp-支持)
+- [常见问题](#常见问题)
+- [翻译模组](#翻译模组)
+- [手动翻译](#手动翻译)
+- [关于再分发](#关于再分发)
+- [纹理翻译](#纹理翻译)
+- [与自动翻译器集成](#与自动翻译器集成)
+- [实现翻译器](#实现翻译器)
+- [实现资源重定向器](#实现资源重定向器)
 
-## Index
- * [Introduction](#introduction)
- * [Plugin Frameworks](#plugin-frameworks)
- * [Installation](#installation)
- * [Key Mapping](#key-mapping)
- * [Translators](#translators)
- * [Text Frameworks](#text-frameworks)
- * [Configuration](#configuration)
- * [IL2CPP Support](#il2cpp-support)
- * [Frequently Asked Questions](#frequently-asked-questions)
- * [Translating Mods](#translating-mods)
- * [Manual Translations](#manual-translations)
- * [Regarding Redistribution](#regarding-redistribution)
- * [Texture Translation](#texture-translation)
- * [Integrating with Auto Translator](#integrating-with-auto-translator)
- * [Implementing a Translator](#implementing-a-translator)
- * [Implementing a Resource Redirector](#implementing-a-resource-redirector)
- 
-## Introduction
-This is an advanced translator plugin that can be used to translate Unity-based games automatically and also provides the tools required to translate games manually.
 
-It does (obviously) go to the internet, in order to provide the automated translation, so if you are not comfortable with that, don't use it.
+## 介绍
+这是一款高级翻译插件，可用于自动翻译基于 Unity 的游戏，还提供手动翻译游戏所需的工具。
 
-If you intend on redistributing this plugin as part of a translation suite for a game, please read [this section](#regarding-redistribution) and the section regarding [manual translations](#manual-translations) so you understand how the plugin operates.
+显然，它需要联网才能提供自动翻译功能，因此如果您对此不满，请不要使用。
 
-## Plugin Frameworks
-The mod can be installed without any external dependencies or as a plugin to the following Plugin Managers/Mod Loaders:
- * [BepInEx](https://github.com/bbepis/BepInEx) (recommended)
- * [MelonLoader](https://melonwiki.xyz)
- * [IPA](https://github.com/Eusth/IPA)
- * UnityInjector
+如果您打算将此插件作为游戏翻译套件的一部分进行再分发，请阅读[本节](#关于再分发)和[手动翻译](#手动翻译)部分，以便了解插件的运行方式。
 
-Installation instructions for all methods can be found below.
 
-## Installation
-The plugin can be installed in following ways:
+## 插件框架
+该模组可在不依赖任何外部组件的情况下安装，也可作为以下插件管理器/模组加载器的插件安装：
+- [BepInEx](https://github.com/bbepis/BepInEx)（推荐）
+- [MelonLoader](https://melonwiki.xyz)
+- [IPA](https://github.com/Eusth/IPA)
+- UnityInjector
 
-### Standalone Installation (ReiPatcher)
-REQUIRES: Nothing, ReiPatcher is provided by this download.
+所有安装方法的说明如下。
 
-*VERY IMPORTANT NOTE: Using this method is a certain way to get the plugin working in most Unity games with two simple clicks. Do note that if one of the supported Plugin Managers is used, this installation method should be avoided as it will cause problems.*
 
- 0. Read the `VERY IMPORTANT NOTE` above.
- 1. Download XUnity.AutoTranslator-ReiPatcher-{VERSION}.zip from [releases](../../releases).
- 2. Extract directly into the game directory, such that "SetupReiPatcherAndAutoTranslator.exe" is placed alongside other exe files.
- 3. Execute "SetupReiPatcherAndAutoTranslator.exe". This will setup up ReiPatcher correctly.
- 4. Execute the shortcut {GameExeName} (Patch and Run).lnk that was created besides existing executables. This will patch and launch the game.
- 5. From now on you can launch the game from the {GameExeName}.exe instead.
- 6. Due to various considerations, not all text hooks are enabled by default, so if you find that the game or parts of the game are not being properly translated it may be worth going into the configuration file and enable some of the disabled text frameworks! The configuration file is created when the game is launched.
+## 安装
+该插件可通过以下方式安装：
 
-The file structure should like like this
+### 独立安装（ReiPatcher）
+要求：无，本下载包已提供 ReiPatcher。
+*非常重要的注意事项：使用此方法可通过两次简单点击在大多数 Unity 游戏中使插件正常工作。请注意，如果使用受支持的插件管理器，则应避免使用此安装方法，否则会导致问题。*
+1. 阅读上面的“非常重要的注意事项”。
+2. 从[发布页](../../releases)下载 XUnity.AutoTranslator-ReiPatcher-{版本号}.zip。
+3. 直接解压到游戏目录，使“SetupReiPatcherAndAutoTranslator.exe”与其他可执行文件放在一起。
+4. 运行“SetupReiPatcherAndAutoTranslator.exe”，这将正确设置 ReiPatcher。
+5. 运行在现有可执行文件旁边创建的快捷方式“{游戏可执行文件名}（Patch and Run）.lnk”，这将修补并启动游戏。
+6. 从现在开始，您可以直接从 {游戏可执行文件名}.exe 启动游戏。
+7. 出于多种考虑，并非所有文本钩子都默认启用，因此如果您发现游戏或游戏的某些部分没有被正确翻译，不妨进入配置文件，启用一些已禁用的文本框架！配置文件会在游戏启动时创建。
+
+文件结构应如下所示：
 ```
-{GameDirectory}/ReiPatcher/Patches/XUnity.AutoTranslator.Patcher.dll
-{GameDirectory}/ReiPatcher/ExIni.dll
-{GameDirectory}/ReiPatcher/Mono.Cecil.dll
-{GameDirectory}/ReiPatcher/Mono.Cecil.Inject.dll
-{GameDirectory}/ReiPatcher/Mono.Cecil.Mdb.dll
-{GameDirectory}/ReiPatcher/Mono.Cecil.Pdb.dll
-{GameDirectory}/ReiPatcher/Mono.Cecil.Rocks.dll
-{GameDirectory}/ReiPatcher/ReiPatcher.exe
-{GameDirectory}/{GameExeName}_Data/Managed/ReiPatcher.exe
-{GameDirectory}/{GameExeName}_Data/Managed/XUnity.Common.dll
-{GameDirectory}/{GameExeName}_Data/Managed/XUnity.ResourceRedirector.dll
-{GameDirectory}/{GameExeName}_Data/Managed/XUnity.AutoTranslator.Plugin.Core.dll
-{GameDirectory}/{GameExeName}_Data/Managed/XUnity.AutoTranslator.Plugin.ExtProtocol.dll
-{GameDirectory}/{GameExeName}_Data/Managed/MonoMod.RuntimeDetour.dll
-{GameDirectory}/{GameExeName}_Data/Managed/MonoMod.Utils.dll
-{GameDirectory}/{GameExeName}_Data/Managed/Mono.Cecil.dll
-{GameDirectory}/{GameExeName}_Data/Managed/0Harmony.dll
-{GameDirectory}/{GameExeName}_Data/Managed/ExIni.dll
-{GameDirectory}/{GameExeName}_Data/Managed/Translators/{Translator}.dll
-{GameDirectory}/AutoTranslator/Translation/AnyTranslationFile.txt (these files will be auto generated by plugin!)
- ```
-
-**NOTE:** The `Mono.Cecil.dll` file placed in the ReiPatcher directory is not the same file as is placed in the Managed directory.
-
-### BepInEx Plugin
-REQUIRES: [BepInEx plugin manager](https://github.com/BepInEx/BepInEx) (follow its installation instructions first!). 
-
- 1. Download XUnity.AutoTranslator-BepInEx-{VERSION}.zip from [releases](../../releases).
- 2. Extract directly into the game directory, such that the plugin dlls are placed in BepInEx folder.
- 3. Launch the game.
- 4. Due to various considerations, not all text hooks are enabled by default, so if you find that the game or parts of the game are not being properly translated it may be worth going into the configuration file and enable some of the disabled text frameworks! The configuration file is created when the game is launched.
-
-The file structure should like like this:
-```
-{GameDirectory}/BepInEx/core/XUnity.Common.dll
-{GameDirectory}/BepInEx/plugins/XUnity.ResourceRedirector/XUnity.ResourceRedirector.dll
-{GameDirectory}/BepInEx/plugins/XUnity.ResourceRedirector/XUnity.ResourceRedirector.BepInEx.dll
-{GameDirectory}/BepInEx/plugins/XUnity.AutoTranslator/XUnity.AutoTranslator.Plugin.Core.dll
-{GameDirectory}/BepInEx/plugins/XUnity.AutoTranslator/XUnity.AutoTranslator.Plugin.BepInEx.dll
-{GameDirectory}/BepInEx/plugins/XUnity.AutoTranslator/XUnity.AutoTranslator.Plugin.ExtProtocol.dll
-{GameDirectory}/BepInEx/plugins/XUnity.AutoTranslator/ExIni.dll
-{GameDirectory}/BepInEx/plugins/XUnity.AutoTranslator/Translators/{Translator}.dll
-{GameDirectory}/BepInEx/core/MonoMod.RuntimeDetour.dll
-{GameDirectory}/BepInEx/core/MonoMod.Utils.dll
-{GameDirectory}/BepInEx/core/Mono.Cecil.dll
-{GameDirectory}/BepInEx/Translation/AnyTranslationFile.txt (these files will be auto generated by plugin!)
+{游戏目录}/ReiPatcher/Patches/XUnity.AutoTranslator.Patcher.dll
+{游戏目录}/ReiPatcher/ExIni.dll
+{游戏目录}/ReiPatcher/Mono.Cecil.dll
+{游戏目录}/ReiPatcher/Mono.Cecil.Inject.dll
+{游戏目录}/ReiPatcher/Mono.Cecil.Mdb.dll
+{游戏目录}/ReiPatcher/Mono.Cecil.Pdb.dll
+{游戏目录}/ReiPatcher/Mono.Cecil.Rocks.dll
+{游戏目录}/ReiPatcher/ReiPatcher.exe
+{游戏目录}/{游戏可执行文件名}_Data/Managed/ReiPatcher.exe
+{游戏目录}/{游戏可执行文件名}_Data/Managed/XUnity.Common.dll
+{游戏目录}/{游戏可执行文件名}_Data/Managed/XUnity.ResourceRedirector.dll
+{游戏目录}/{游戏可执行文件名}_Data/Managed/XUnity.AutoTranslator.Plugin.Core.dll
+{游戏目录}/{游戏可执行文件名}_Data/Managed/XUnity.AutoTranslator.Plugin.ExtProtocol.dll
+{游戏目录}/{游戏可执行文件名}_Data/Managed/MonoMod.RuntimeDetour.dll
+{游戏目录}/{游戏可执行文件名}_Data/Managed/MonoMod.Utils.dll
+{游戏目录}/{游戏可执行文件名}_Data/Managed/Mono.Cecil.dll
+{游戏目录}/{游戏可执行文件名}_Data/Managed/0Harmony.dll
+{游戏目录}/{游戏可执行文件名}_Data/Managed/ExIni.dll
+{游戏目录}/{游戏可执行文件名}_Data/Managed/Translators/{翻译器}.dll
+{游戏目录}/AutoTranslator/Translation/AnyTranslationFile.txt（这些文件将由插件自动生成！）
 ```
 
-#### BepInEx IL2CPP Plugin
-The instructions for installation for IL2CPP are the same as for the standard version except that you must install BepInEx 6 for IL2CPP, which as of this writing are only available as bleeding edge builds [right here](https://builds.bepis.io/projects/bepinex_be) and you must use the `BepInEx-IL2CPP` package of this plugin instead.
+**注意**：放在 ReiPatcher 目录中的 `Mono.Cecil.dll` 文件与放在 Managed 目录中的文件不同。
 
-The current version (5.4.0) was built against bleeding edge build 704.
 
-### MelonLoader Plugin
-REQUIRES: [Melon Loader](https://melonwiki.xyz) (follow its installation instructions first!).
+### BepInEx 插件
+要求：[BepInEx 插件管理器](https://github.com/BepInEx/BepInEx)（请先按照其安装说明操作！）。
+1. 从[发布页](../../releases)下载 XUnity.AutoTranslator-BepInEx-{版本号}.zip。
+2. 直接解压到游戏目录，使插件 DLL 文件放在 BepInEx 文件夹中。
+3. 启动游戏。
+4. 出于多种考虑，并非所有文本钩子都默认启用，因此如果您发现游戏或游戏的某些部分没有被正确翻译，不妨进入配置文件，启用一些已禁用的文本框架！配置文件会在游戏启动时创建。
 
- 1. Download XUnity.AutoTranslator-MelonMod-{VERSION}.zip from [releases](../../releases).
- 2. Extract directly into the game directory, such that the plugin dlls are placed in Mods and UserLibs folders.
- 3. Launch the game.
- 4. Due to various considerations, not all text hooks are enabled by default, so if you find that the game or parts of the game are not being properly translated it may be worth going into the configuration file and enable some of the disabled text frameworks! The configuration file is created when the game is launched.
-
-The file structure should like like this:
+文件结构应如下所示：
 ```
-{GameDirectory}/Mods/XUnity.AutoTranslator.Plugin.MelonMod.dll
-{GameDirectory}/UserLibs/XUnity.Common.dll
-{GameDirectory}/UserLibs/XUnity.ResourceRedirector.dll
-{GameDirectory}/UserLibs/XUnity.AutoTranslator.Plugin.Core.dll
-{GameDirectory}/UserLibs/XUnity.AutoTranslator.Plugin.ExtProtocol.dll
-{GameDirectory}/UserLibs/ExIni.dll
-{GameDirectory}/UserLibs/Translators/{Translator}.dll
-{GameDirectory}/AutoTranslator/Translation/AnyTranslationFile.txt (these files will be auto generated by plugin!)
+{游戏目录}/BepInEx/core/XUnity.Common.dll
+{游戏目录}/BepInEx/plugins/XUnity.ResourceRedirector/XUnity.ResourceRedirector.dll
+{游戏目录}/BepInEx/plugins/XUnity.ResourceRedirector/XUnity.ResourceRedirector.BepInEx.dll
+{游戏目录}/BepInEx/plugins/XUnity.AutoTranslator/XUnity.AutoTranslator.Plugin.Core.dll
+{游戏目录}/BepInEx/plugins/XUnity.AutoTranslator/XUnity.AutoTranslator.Plugin.BepInEx.dll
+{游戏目录}/BepInEx/plugins/XUnity.AutoTranslator/XUnity.AutoTranslator.Plugin.ExtProtocol.dll
+{游戏目录}/BepInEx/plugins/XUnity.AutoTranslator/ExIni.dll
+{游戏目录}/BepInEx/plugins/XUnity.AutoTranslator/Translators/{翻译器}.dll
+{游戏目录}/BepInEx/core/MonoMod.RuntimeDetour.dll
+{游戏目录}/BepInEx/core/MonoMod.Utils.dll
+{游戏目录}/BepInEx/core/Mono.Cecil.dll
+{游戏目录}/BepInEx/Translation/AnyTranslationFile.txt（这些文件将由插件自动生成！）
 ```
 
-The current version (5.4.0) was built against v0.6.1 Open-Beta.
+#### BepInEx IL2CPP 插件
+IL2CPP 版本的安装说明与标准版本相同，但您必须安装用于 IL2CPP 的 BepInEx 6（截至撰写本文时，仅可在[此处](https://builds.bepis.io/projects/bepinex_be)获取 bleeding edge 版本），并且必须使用本插件的 `BepInEx-IL2CPP` 包。
 
-#### MelonLoader IL2CPP Plugin
-The instructions for installation for IL2CPP are the same as for the standard version except that you must use the `MelonMod-IL2CPP` package of this plugin instead.
+当前版本（5.4.0）基于 bleeding edge build 704 构建。
 
-### IPA Plugin
-REQUIRES: [IPA plugin manager](https://github.com/Eusth/IPA) (follow its installation instructions first!).
 
- 1. Download XUnity.AutoTranslator-IPA-{VERSION}.zip from [releases](../../releases).
- 2. Extract directly into the game directory, such that the plugin dlls are placed in Plugins folder.
- 3. Launch the game.
- 4. Due to various considerations, not all text hooks are enabled by default, so if you find that the game or parts of the game are not being properly translated it may be worth going into the configuration file and enable some of the disabled text frameworks! The configuration file is created when the game is launched.
+### MelonLoader 插件
+要求：[Melon Loader](https://melonwiki.xyz)（请先按照其安装说明操作！）。
+1. 从[发布页](../../releases)下载 XUnity.AutoTranslator-MelonMod-{版本号}.zip。
+2. 直接解压到游戏目录，使插件 DLL 文件放在 Mods 和 UserLibs 文件夹中。
+3. 启动游戏。
+4. 出于多种考虑，并非所有文本钩子都默认启用，因此如果您发现游戏或游戏的某些部分没有被正确翻译，不妨进入配置文件，启用一些已禁用的文本框架！配置文件会在游戏启动时创建。
 
-The file structure should like like this
+文件结构应如下所示：
 ```
-{GameDirectory}/Plugins/XUnity.Common.dll
-{GameDirectory}/Plugins/XUnity.ResourceRedirector.dll
-{GameDirectory}/Plugins/XUnity.AutoTranslator.Plugin.Core.dll
-{GameDirectory}/Plugins/XUnity.AutoTranslator.Plugin.IPA.dll
-{GameDirectory}/Plugins/XUnity.AutoTranslator.Plugin.ExtProtocol.dll
-{GameDirectory}/Plugins/MonoMod.RuntimeDetour.dll
-{GameDirectory}/Plugins/MonoMod.Utils.dll
-{GameDirectory}/Plugins/Mono.Cecil.dll
-{GameDirectory}/Plugins/0Harmony.dll
-{GameDirectory}/Plugins/ExIni.dll
-{GameDirectory}/Plugins/Translators/{Translator}.dll
-{GameDirectory}/Plugins/Translation/AnyTranslationFile.txt (these files will be auto generated by plugin!)
- ```
-
-### UnityInjector Plugin
-REQUIRES: UnityInjector (follow its installation instructions first!).
-
- 1. Download XUnity.AutoTranslator-UnityInjector-{VERSION}.zip from [releases](../../releases).
- 2. Extract directly into the game directory, such that the plugin dlls are placed in UnityInjector folder. **This may not be game root directory!**
- 3. Launch the game.
- 4. Due to various considerations, not all text hooks are enabled by default, so if you find that the game or parts of the game are not being properly translated it may be worth going into the configuration file and enable some of the disabled text frameworks! The configuration file is created when the game is launched.
-
-The file structure should like like this
+{游戏目录}/Mods/XUnity.AutoTranslator.Plugin.MelonMod.dll
+{游戏目录}/UserLibs/XUnity.Common.dll
+{游戏目录}/UserLibs/XUnity.ResourceRedirector.dll
+{游戏目录}/UserLibs/XUnity.AutoTranslator.Plugin.Core.dll
+{游戏目录}/UserLibs/XUnity.AutoTranslator.Plugin.ExtProtocol.dll
+{游戏目录}/UserLibs/ExIni.dll
+{游戏目录}/UserLibs/Translators/{翻译器}.dll
+{游戏目录}/AutoTranslator/Translation/AnyTranslationFile.txt（这些文件将由插件自动生成！）
 ```
-{GameDirectory}/UnityInjector/XUnity.Common.dll
-{GameDirectory}/UnityInjector/XUnity.ResourceRedirector.dll
-{GameDirectory}/UnityInjector/XUnity.AutoTranslator.Plugin.Core.dll
-{GameDirectory}/UnityInjector/XUnity.AutoTranslator.Plugin.UnityInjector.dll
-{GameDirectory}/UnityInjector/XUnity.AutoTranslator.Plugin.ExtProtocol.dll
-{GameDirectory}/UnityInjector/0Harmony.dll
-{GameDirectory}/UnityInjector/Translators/{Translator}.dll
-{GameDirectory}/UnityInjector/Config/Translation/AnyTranslationFile.txt (these files will be auto generated by plugin!)
- ```
 
-**NOTE:** MonoMod hooks are not supported with this installation method because an outdated version of `Mono.Cecil.dll` is being used with Sybaris.
- 
-## Key Mapping
-The following key inputs are mapped:
- * ALT + 0: Toggle XUnity AutoTranslator UI. (That's a zero, not an O)
- * ALT + 1: Toggle Translation Aggregator UI.
- * ALT + T: Alternate between translated and untranslated versions of all texts provided by this plugin.
- * ALT + R: Reload translation files. Useful if you change the text and texture files on the fly. Not guaranteed to work for all textures.
- * ALT + U: Manual hooking. The default hooks wont always pick up texts. This will attempt to make lookups manually. Will not hook text components from frameworks not enabled.
- * ALT + F: If OverrideFont is configured, will toggle between overridden and default font.
- * ALT + Q: Reboot the plugin if it was shutdown. This will only work if the plugin was shut down due to consecutive errors towards the translation endpoint. Should only be used if you have reason to believe you have remedied the problem (such as changed VPN endpoint etc.) otherwise it will just shut down again.
+当前版本（5.4.0）基于 v0.6.1 Open-Beta 构建。
 
- Debugging-only keys:
-  * CTRL + ALT + NP9: Simulate synchronous errors
-  * CTRL + ALT + NP8: Simulate asynchronous errors delayed by one second
-  * CTRL + ALT + NP7: Print out loaded scene names and ids to console
-  * CTRL + ALT + NP6: Print out entire GameObject hierarchy to file `hierarchy.txt`
+#### MelonLoader IL2CPP 插件
+IL2CPP 版本的安装说明与标准版本相同，但您必须使用本插件的 `MelonMod-IL2CPP` 包。
 
-## Translators
-Translations are obtained through translation endpoints, which are basically plugins for AutoTranslator. The endpoint plugins are stored in the `Translators` subfolder.
 
-### Built-in
-Here's a list of translators supported out of the box:
- * [GoogleTranslate](https://untrack.link/https://translate.google.com/), based on the online Google translation service. Does not require authentication.
-   * No limitations, but unstable.
- * [GoogleTranslateV2](https://untrack.link/https://translate.google.com/), based on the online Google translation service. Does not require authentication.
-   * No limitations, but unstable. Currently being tested. May replace original version in future since that API is no longer used on their official translator web.
- * [GoogleTranslateCompat](https://untrack.link/https://translate.google.com/), same as the above, except requests are served out-of-process which is needed in some versions of Unity/Mono.
-   * No limitations, but unstable.
- * [GoogleTranslateLegitimate](https://untrack.link/https://cloud.google.com/translate/), based on the Google cloud translation API. Requires an API key.
-   * Provides trial period of 1 year with $300 credits. Enough for 15 million characters translations.
- * [BingTranslate](https://untrack.link/https://www.bing.com/translator), based on the online Bing translation service. Does not require authentication.
-   * No limitations, but unstable.
- * [BingTranslateLegitimate](https://untrack.link/https://docs.microsoft.com/en-us/azure/cognitive-services/translator/translator-info-overview), based on the Azure text translation. Requires an API key.
-   * Free up to 2 million characters per month.
- * [DeepLTranslate](https://untrack.link/https://www.deepl.com/translator), based on the online DeepL translation service. Does not require authentication.
-   * No limitations, but unstable. Remarkable quality.
- * [DeepLTranslateLegitimate](https://untrack.link/https://www.deepl.com/translator), based on the online DeepL translation service. Requires an  API Key.
-   * $4.99 per month and $20 per million characters translated that month. 
-   * Free up to 0.5 million characters per month.
-   * For now, you must subscribe to DeepL API (for Developers). - DOES NOT WORK WITH DeepL Pro (Starter, Advanced and Ultimate)
- * [PapagoTranslate](https://untrack.link/https://papago.naver.com/), based on the online Papago translation service. Does not require authentication.
-   * No limitations, but unstable.
- * [BaiduTranslate](https://untrack.link/https://fanyi.baidu.com/), based on Baidu translation service. Requires AppId and AppSecret.
-   * After registration, the first 50,000 characters per month are free (QPS=1), and 49 yuan/million characters are charged after that. If you have passed the free identity authentication, then the first 1 million characters per month are free (QPS=10), and the excess is charged at 49 yuan/million characters. The longest single request is 6000 characters.
- * [YandexTranslate](https://untrack.link/https://tech.yandex.com/translate/), based on the Yandex translation service. Requires an API key.
-   * Free up to 1 million characters per day, but max 10 million characters per month.
- * [WatsonTranslate](https://untrack.link/https://cloud.ibm.com/apidocs/language-translator), based on IBM's Watson. Requires a URL and an API key.
-   * Free up to 1 million characters per month.
- * LecPowerTranslator15, based on LEC's Power Translator. Does not require authentication, but does require the software installed.
-   * No limitations.
- * ezTrans XP, based on Changsinsoft's japanese-korean translator ezTrans XP. Does not require authentication, but does require the software and [Ehnd](https://github.com/sokcuri/ehnd) installed.
-   * No limitations.
- * [LingoCloudTranslate](https://untrack.link/https://fanyi.caiyunapp.com/), based on the online LingoCloud translation service. Translation is only supported in Chinese and two other languages: Japanese and English.
-   * After registration and free certification, the first 1 million characters per month are free, and the excess will be charged at 20 yuan/million characters.The official test token is `3975l6lr5pcbvidl6jl2`, you can try it before registering.
- * CustomTranslate. You can also specify any custom HTTP url that can be used as a translation endpoint (GET request). This must use the query parameters "from", "to" and "text" and return only a string with the result (try HTTP without SSL first, as unity-mono often has issues with SSL).
-   * *NOTE: This is a developer-centric option. You cannot simply specify "CustomTranslate" and expect it to work with any arbitrary translation service you find online. See [FAQ](#frequently-asked-questions)*
-   * Example Configuration:
-     * Endpoint=CustomTranslate
-     * [Custom]
-     * Url=http://my-custom-translation-service.net/translate
-   * Example Request: GET http://my-custom-translation-service.net/translate?from=ja&to=en&text=こんにちは
-   * Example Response (only body): Hello
-   * Known implementations that can be used with CustomTranslate:
-     * ezTrans: https://github.com/HelloKS/ezTransWeb
+### IPA 插件
+要求：[IPA 插件管理器](https://github.com/Eusth/IPA)（请先按照其安装说明操作！）。
+1. 从[发布页](../../releases)下载 XUnity.AutoTranslator-IPA-{版本号}.zip。
+2. 直接解压到游戏目录，使插件 DLL 文件放在 Plugins 文件夹中。
+3. 启动游戏。
+4. 出于多种考虑，并非所有文本钩子都默认启用，因此如果您发现游戏或游戏的某些部分没有被正确翻译，不妨进入配置文件，启用一些已禁用的文本框架！配置文件会在游戏启动时创建。
 
-*NOTE: If you use any of the online translators that does not require some form of authentication, that this plugin may break at any time.*
+文件结构应如下所示：
+```
+{游戏目录}/Plugins/XUnity.Common.dll
+{游戏目录}/Plugins/XUnity.ResourceRedirector.dll
+{游戏目录}/Plugins/XUnity.AutoTranslator.Plugin.Core.dll
+{游戏目录}/Plugins/XUnity.AutoTranslator.Plugin.IPA.dll
+{游戏目录}/Plugins/XUnity.AutoTranslator.Plugin.ExtProtocol.dll
+{游戏目录}/Plugins/MonoMod.RuntimeDetour.dll
+{游戏目录}/Plugins/MonoMod.Utils.dll
+{游戏目录}/Plugins/Mono.Cecil.dll
+{游戏目录}/Plugins/0Harmony.dll
+{游戏目录}/Plugins/ExIni.dll
+{游戏目录}/Plugins/Translators/{翻译器}.dll
+{游戏目录}/Plugins/Translation/AnyTranslationFile.txt（这些文件将由插件自动生成！）
+```
 
-### Third-party
-Since 3.0.0, you can also implement your own translators. To do so, follow the instruction [here](#implementing-a-translator).
-Here are some third-party translation plugins that you can use with AutoTranslator:
- * [SugoiOfflineTranslatorEndpoint](https://github.com/Vin-meido/XUnity-AutoTranslator-SugoiOfflineTranslatorEndpoint), for use with a Sugoi Translator server.
-   * No limitations. Remarkable quality.
- * [LlmTranslators](https://github.com/joshfreitas1984/XUnity.AutoTranslate.LlmTranslators), for use with OpenAI's LLM, and Ollama Models.
-   * OpenAI requires an APIKey, paid per tokens used. Locally hosted Ollama Models are free.
- * [AutoChatGptTranslator](https://github.com/joshfreitas1984/XUnity.AutoChatGptTranslator), for ChatGPT. Obsolete, use LlmTranslators instead.
-   * Requires an APIKey, paid per tokens used.
- * [AutoLLMTranslator](https://github.com/NothingNullNull/XUnity.AutoLLMTranslator), a generic endpoint that supports many different LLM's, including Ollama models.
-   * Very flexible but requires advanced manual configuration. Recommended only for advanced users.
 
-*NOTE: You use third-party plugins at your own risk - they were checked at the time of being added to the list, but may change over time. Third-party plugins might cause issues or have security issues.*
- 
-### About Authenticated Translators
-If you decide to use an authenticated service *do not ever share your key or secret*. If you do so by accident, you should revoke it immediately. Most, if not all services provides an option for this.
+### UnityInjector 插件
+要求：UnityInjector（请先按照其安装说明操作！）。
+1. 从[发布页](../../releases)下载 XUnity.AutoTranslator-UnityInjector-{版本号}.zip。
+2. 直接解压到游戏目录，使插件 DLL 文件放在 UnityInjector 文件夹中。**这可能不是游戏根目录！**
+3. 启动游戏。
+4. 出于多种考虑，并非所有文本钩子都默认启用，因此如果您发现游戏或游戏的某些部分没有被正确翻译，不妨进入配置文件，启用一些已禁用的文本框架！配置文件会在游戏启动时创建。
 
-If you want to use a paid option, remember to check if that plugin supports the language you want to translate from and to before paying. Also, while the plugin does attempt to keep the amount of requests sent to the translation endpoint to a minimum, there are no guarantees about how much it will ask the endpoint to translate, and the author/owner of this repository takes no responsibility for any charges you may receive from your selected translation provider as a result of using this plugin.
+文件结构应如下所示：
+```
+{游戏目录}/UnityInjector/XUnity.Common.dll
+{游戏目录}/UnityInjector/XUnity.ResourceRedirector.dll
+{游戏目录}/UnityInjector/XUnity.AutoTranslator.Plugin.Core.dll
+{游戏目录}/UnityInjector/XUnity.AutoTranslator.Plugin.UnityInjector.dll
+{游戏目录}/UnityInjector/XUnity.AutoTranslator.Plugin.ExtProtocol.dll
+{游戏目录}/UnityInjector/0Harmony.dll
+{游戏目录}/UnityInjector/Translators/{翻译器}.dll
+{游戏目录}/UnityInjector/Config/Translation/AnyTranslationFile.txt（这些文件将由插件自动生成！）
+```
 
-How the plugin attempts to minimize the number of requests it sends out is outlined [here](#spam-prevention).
+**注意**：此安装方法不支持 MonoMod 钩子，因为 Sybaris 使用的是过时版本的 `Mono.Cecil.dll`。
 
-### Spam Prevention
-The plugin employs the following spam prevention mechanisms:
- 1. When it sees a new text, it will always wait one second before it queues a translation request, to check if that same text changes. It will not send out any request until the text has not changed for 1 second.
- 2. It will never send out more than 8000 requests (max 200 characters each (configurable)) during a single game session.
- 3. It will never send out more than 1 request at a time (no concurrency!).
- 4. If it detects an increasing number of queued translations (4000), the plugin will shutdown.
- 5. If the service returns no result for five consecutive requests, the plugin will shutdown.
- 6. If the plugin detects that the game queues translations every frame, the plugin will shutdown after 90 frames.
- 7. If the plugin detects text that "scrolls" into place, the plugin will shutdown. This is detected by inspecting all requests that are queued for translation. ((1) will genenerally prevent this from happening)
- 8. If the plugin consistently queues translations every second for more than 60 seconds, the plugin will shutdown.
- 9. For the supported languages, each translatable line must pass a symbol check that detects if the line includes characters from the source language.
- 10. It will never attempt a translation for a text that is already considered a translation for something else.
- 11. All queued translations are kept track of. If two different components that require the same translation and both are queued for translation at the same time, only a single request is sent.
- 12. It employs an internal dictionary of manual translations (~2000 in total) for commonly used phrases (Japanese-to-English only) to prevent sending out translation requests for these.
- 13. Some endpoints support batching of translations so far fewer requests are sent. This does not increase the total number of translations per session (2).
- 14. All translation results are cached in memory and stored on disk to prevent making the same translation request twice.
- 15. Due to its spammy nature, any text that comes from an IMGUI component has any numbers found in it templated away (and substituted back in upon translation) to prevent issues in relation to (6).
- 16. The plugin will keep a single TCP connection alive towards the translation endpoint. This connection will be gracefully closed if it is not used for 50 seconds.
 
-## Text Frameworks
-The following text frameworks are supported.
- * [UGUI](https://docs.unity3d.com/Manual/UISystem.html)
- * [NGUI](https://assetstore.unity.com/packages/tools/gui/ngui-next-gen-ui-2413)
- * [IMGUI](https://docs.unity3d.com/Manual/GUIScriptingGuide.html) (disabled by default)
- * [TextMeshPro](http://digitalnativestudios.com/textmeshpro/docs/)
- * [TextMesh](https://docs.unity3d.com/Manual/class-TextMesh.html) (disabled by default, often text float in 3D space)
- * [FairyGUI for Unity](https://github.com/fairygui/FairyGUI-unity)
- * [Utage (VN Game Engine)](http://madnesslabo.net/utage/?lang=en)
+## 按键映射
+以下是按键映射：
+- ALT + 0：切换 XUnity 自动翻译器界面（是数字 0，不是字母 O）。
+- ALT + 1：切换翻译聚合器界面。
+- ALT + T：在本插件提供的所有文本的翻译版本和未翻译版本之间切换。
+- ALT + R：重新加载翻译文件。如果您实时更改了文本和纹理文件，此功能很有用。不保证对所有纹理都有效。
+- ALT + U：手动挂钩。默认挂钩可能无法捕获所有文本。此功能将尝试手动查找。不会挂钩未启用的框架中的文本组件。
+- ALT + F：如果配置了 OverrideFont，将在替代字体和默认字体之间切换。
+- ALT + Q：如果插件因翻译端点连续出错而关闭，可重启插件。仅在您有理由相信问题已解决（例如更改了 VPN 端点等）时使用，否则它会再次关闭。
 
-## Configuration
-The default configuration file, looks as such:
+仅调试用按键：
+- CTRL + ALT + NP9：模拟同步错误
+- CTRL + ALT + NP8：模拟延迟一秒的异步错误
+- CTRL + ALT + NP7：将加载的场景名称和 ID 打印到控制台
+- CTRL + ALT + NP6：将整个游戏对象层次结构打印到文件 `hierarchy.txt`
 
+
+## 翻译器
+翻译通过翻译端点获取，翻译端点本质上是自动翻译器的插件。端点插件存储在 `Translators` 子文件夹中。
+
+### 内置翻译器
+以下是默认支持的翻译器列表：
+- [GoogleTranslate](https://untrack.link/https://translate.google.com/)，基于谷歌在线翻译服务。不需要身份验证。
+  - 无限制，但不稳定。
+- [GoogleTranslateV2](https://untrack.link/https://translate.google.com/)，基于谷歌在线翻译服务。不需要身份验证。
+  - 无限制，但不稳定。目前正在测试中。未来可能会取代原始版本，因为其官方翻译器网站已不再使用该 API。
+- [GoogleTranslateCompat](https://untrack.link/https://translate.google.com/)，与上述相同，但请求在进程外处理，这在某些版本的 Unity/Mono 中是必需的。
+  - 无限制，但不稳定。
+- [GoogleTranslateLegitimate](https://untrack.link/https://cloud.google.com/translate/)，基于谷歌云翻译 API。需要 API 密钥。
+  - 提供 1 年的试用期和 300 美元的信用额度。足够翻译 1500 万个字符。
+- [BingTranslate](https://untrack.link/https://www.bing.com/translator)，基于必应在线翻译服务。不需要身份验证。
+  - 无限制，但不稳定。
+- [BingTranslateLegitimate](https://untrack.link/https://docs.microsoft.com/en-us/azure/cognitive-services/translator/translator-info-overview)，基于 Azure 文本翻译。需要 API 密钥。
+  - 每月免费翻译 up 至 200 万个字符。
+- [DeepLTranslate](https://untrack.link/https://www.deepl.com/translator)，基于 DeepL 在线翻译服务。不需要身份验证。
+  - 无限制，但不稳定。翻译质量出色。
+- [DeepLTranslateLegitimate](https://untrack.link/https://www.deepl.com/translator)，基于 DeepL 在线翻译服务。需要 API 密钥。
+  - 每月 4.99 美元，当月翻译的字符每百万收费 20 美元。
+  - 每月免费翻译 up 至 50 万个字符。
+  - 目前，您必须订阅 DeepL API（面向开发者）。不支持 DeepL Pro（入门版、高级版和终极版）。
+- [PapagoTranslate](https://untrack.link/https://papago.naver.com/)，基于 Naver Papago 在线翻译服务。不需要身份验证。
+  - 无限制，但不稳定。
+- [BaiduTranslate](https://untrack.link/https://fanyi.baidu.com/)，基于百度翻译服务。需要 AppId 和 AppSecret。
+  - 注册后，每月前 5 万个字符免费（QPS=1），超出部分按 49 元/百万字符收费。如果您已通过免费身份验证，则每月前 100 万个字符免费（QPS=10），超出部分按 49 元/百万字符收费。单次请求最长为 6000 个字符。
+- [YandexTranslate](https://untrack.link/https://tech.yandex.com/translate/)，基于 Yandex 翻译服务。需要 API 密钥。
+  - 每天免费翻译 up 至 100 万个字符，但每月最多 1000 万个字符。
+- [WatsonTranslate](https://untrack.link/https://cloud.ibm.com/apidocs/language-translator)，基于 IBM 的 Watson。需要 URL 和 API 密钥。
+  - 每月免费翻译 up 至 100 万个字符。
+- LecPowerTranslator15，基于 LEC 的 Power Translator。不需要身份验证，但需要安装该软件。
+  - 无限制。
+- ezTrans XP，基于 Changsinsoft 的日韩翻译器 ezTrans XP。不需要身份验证，但需要安装该软件和 [Ehnd](https://github.com/sokcuri/ehnd)。
+  - 无限制。
+- [LingoCloudTranslate](https://untrack.link/https://fanyi.caiyunapp.com/)，基于灵云在线翻译服务。仅支持中文与另外两种语言的互译：日语和英语。
+  - 注册并通过免费认证后，每月前 100 万个字符免费，超出部分按 20 元/百万字符收费。官方测试令牌为 `3975l6lr5pcbvidl6jl2`，您可以在注册前试用。
+- CustomTranslate。您也可以指定任何可作为翻译端点的自定义 HTTP URL（GET 请求）。它必须使用查询参数“from”“to”和“text”，并且仅返回包含结果的字符串（首先尝试不带 SSL 的 HTTP，因为 unity-mono 经常在 SSL 方面有问题）。
+  - *注意：这是一个以开发者为中心的选项。您不能简单地指定“CustomTranslate”并期望它能与您在网上找到的任何翻译服务一起工作。请参见[常见问题](#常见问题)*
+  - 配置示例：
+    - Endpoint=CustomTranslate
+    - [Custom]
+    - Url=http://my-custom-translation-service.net/translate
+  - 请求示例：GET http://my-custom-translation-service.net/translate?from=ja&to=en&text=こんにちは
+  - 响应示例（仅正文）：Hello
+  - 可与 CustomTranslate 一起使用的已知实现：
+    - ezTrans：https://github.com/HelloKS/ezTransWeb
+
+*注意：如果您使用任何不需要某种形式身份验证的在线翻译器，此插件可能会随时失效。*
+
+
+### 第三方翻译器
+从 3.0.0 版本开始，您也可以实现自己的翻译器。为此，请按照[此处](#实现翻译器)的说明进行操作。
+
+以下是一些可与自动翻译器一起使用的第三方翻译插件：
+- [SugoiOfflineTranslatorEndpoint](https://github.com/Vin-meido/XUnity-AutoTranslator-SugoiOfflineTranslatorEndpoint)，用于与 Sugoi 翻译器服务器配合使用。
+  - 无限制。翻译质量出色。
+- [LlmTranslators](https://github.com/joshfreitas1984/XUnity.AutoTranslate.LlmTranslators)，用于与 OpenAI 的 LLM 和 Ollama 模型配合使用。
+  - OpenAI 需要 APIKey，按使用的令牌收费。本地托管的 Ollama 模型免费。
+- [AutoChatGptTranslator](https://github.com/joshfreitas1984/XUnity.AutoChatGptTranslator)，用于 ChatGPT。已过时，请改用 LlmTranslators。
+  - 需要 APIKey，按使用的令牌收费。
+- [AutoLLMTranslator](https://github.com/NothingNullNull/XUnity.AutoLLMTranslator)，一个通用端点，支持许多不同的 LLM，包括 Ollama 模型。
+  - 非常灵活，但需要高级手动配置。仅推荐给高级用户。
+
+*注意：使用第三方插件需自行承担风险——它们在添加到列表时经过了检查，但可能会随时间变化。第三方插件可能会导致问题或存在安全问题。*
+
+
+### 关于需要身份验证的翻译器
+如果您决定使用需要身份验证的服务，*切勿分享您的密钥或密码*。如果不小心分享了，应立即撤销。
+
+如果您想使用付费选项，请记住在付费前检查该插件是否支持您想要翻译的语言。此外，虽然该插件会尝试将发送到翻译端点的请求数量降至最低，但无法保证它会请求翻译的量，本仓库的作者/所有者不对因使用本插件而可能从您选择的翻译提供商处产生的任何费用负责。
+
+插件如何尝试减少发送的请求数量在[此处](#防垃圾信息机制)概述。
+
+
+### 防垃圾信息机制
+该插件采用以下防垃圾信息机制：
+1. 当它看到新文本时，总会等待一秒钟再将翻译请求加入队列，以检查该文本是否有变化。只有当文本在 1 秒内没有变化时，才会发送请求。
+2. 在单次游戏会话中，它发送的请求绝不会超过 8000 个（每个请求最多 200 个字符（可配置））。
+3. 一次绝不会发送多个请求（无并发！）。
+4. 如果检测到排队的翻译数量不断增加（达到 4000 个），插件将关闭。
+5. 如果服务连续五次请求都没有返回结果，插件将关闭。
+6. 如果插件检测到游戏每帧都在排队翻译，插件将在 90 帧后关闭。
+7. 如果插件检测到文本“滚动”显示，插件将关闭。这是通过检查所有排队等待翻译的请求来检测的（机制 1 通常会防止这种情况发生）。
+8. 如果插件检测到每秒都在持续排队翻译，且持续时间超过 60 秒，插件将关闭。
+9. 对于支持的语言，每个可翻译的行都必须通过符号检查，以检测该行是否包含源语言的字符。
+10. 它绝不会尝试翻译已被视为其他内容的翻译的文本。
+11. 所有排队的翻译都会被跟踪。如果两个不同的组件需要相同的翻译，并且都同时被加入翻译队列，只会发送一个请求。
+12. 它采用了一个包含常用短语（仅日英互译）的手动翻译内部词典（总共约 2000 条），以避免为这些短语发送翻译请求。
+13. 一些端点支持翻译批处理，因此发送的请求会少得多。这不会增加每会话的翻译总数（机制 2）。
+14. 所有翻译结果都缓存在内存中并存储在磁盘上，以防止重复发送相同的翻译请求。
+15. 由于其垃圾信息性质，任何来自 IMGUI 组件的文本中发现的数字都会被替换为模板（翻译后再替换回来），以防止与机制 6 相关的问题。
+16. 插件将保持一个与翻译端点的 TCP 连接。如果 50 秒未使用，该连接将被正常关闭。
+
+
+## 文本框架
+支持以下文本框架：
+- [UGUI](https://docs.unity3d.com/Manual/UISystem.html)
+- [NGUI](https://assetstore.unity.com/packages/tools/gui/ngui-next-gen-ui-2413)
+- [IMGUI](https://docs.unity3d.com/Manual/GUIScriptingGuide.html)（默认禁用）
+- [TextMeshPro](http://digitalnativestudios.com/textmeshpro/docs/)
+- [TextMesh](https://docs.unity3d.com/Manual/class-TextMesh.html)（默认禁用，通常文本漂浮在 3D 空间中）
+- [FairyGUI for Unity](https://github.com/fairygui/FairyGUI-unity)
+- [Utage（视觉小说游戏引擎）](http://madnesslabo.net/utage/?lang=en)
+
+
+## 配置
+默认配置文件如下：
 ```ini
 [Service]
-Endpoint=GoogleTranslate         ;Endpoint to use. See the [translators section](#translators) for valid values.
-FallbackEndpoint=                ;Endpoint to automatically fallback to if the primary endpoint fails for a specific translation.
-
+Endpoint=GoogleTranslate         ;要使用的端点。请参见[翻译器部分](#翻译器)了解有效值。
+FallbackEndpoint=                ;如果主要端点对特定翻译失败，将自动 fallback 到的端点。
 [General]
-Language=en                      ;The language to translate into
-FromLanguage=ja                  ;The original language of the game. "auto" is also supported for some endpoints, but it is generally not recommended
-
+Language=en                      ;要翻译到的语言
+FromLanguage=ja                  ;游戏的原始语言。某些端点支持“auto”，但通常不推荐
 [Files]
-Directory=Translation\{Lang}\Text                                   ;Directory to search for cached translation files. Can use placeholder: {GameExeName}, {Lang}
-OutputFile=Translation\{Lang}\Text\_AutoGeneratedTranslations.txt   ;File to insert generated translations into. Can use placeholders: {GameExeName}, {Lang}
-SubstitutionFile=Translation\{Lang}\Text\_Substitutions.txt         ;File that contains substitution applied before translations. Can use placeholders: {GameExeName}, {Lang}
-PreprocessorsFile=Translation\{Lang}\Text\_Preprocessors.txt        ;File that contains preprocessors to be applied before sending a text to a translator. Can use placeholders: {GameExeName}, {Lang}
-PostprocessorsFile=Translation\{Lang}\Text\_Postprocessors.txt      ;File that contains postprocessors to be applied after receiving a text from a translator. Can use placeholders: {GameExeName}, {Lang}
-
+Directory=Translation\{Lang}\Text                                   ;用于搜索缓存翻译文件的目录。可使用占位符：{GameExeName}、{Lang}
+OutputFile=Translation\{Lang}\Text\_AutoGeneratedTranslations.txt   ;用于插入生成的翻译的文件。可使用占位符：{GameExeName}、{Lang}
+SubstitutionFile=Translation\{Lang}\Text\_Substitutions.txt         ;包含翻译前应用的替换的文件。可使用占位符：{GameExeName}、{Lang}
+PreprocessorsFile=Translation\{Lang}\Text\_Preprocessors.txt        ;包含发送文本到翻译器之前要应用的预处理器的文件。可使用占位符：{GameExeName}、{Lang}
+PostprocessorsFile=Translation\{Lang}\Text\_Postprocessors.txt      ;包含从翻译器接收文本之后要应用的后处理器的文件。可使用占位符：{GameExeName}、{Lang}
 [TextFrameworks]
-EnableUGUI=True                  ;Enable or disable UGUI translation
-EnableNGUI=True                  ;Enable or disable NGUI translation
-EnableTextMeshPro=True           ;Enable or disable TextMeshPro translation
-EnableTextMesh=False             ;Enable or disable TextMesh translation
-EnableIMGUI=False                ;Enable or disable IMGUI translation
-
+EnableUGUI=True                  ;启用或禁用 UGUI 翻译
+EnableNGUI=True                  ;启用或禁用 NGUI 翻译
+EnableTextMeshPro=True           ;启用或禁用 TextMeshPro 翻译
+EnableTextMesh=False             ;启用或禁用 TextMesh 翻译
+EnableIMGUI=False                ;启用或禁用 IMGUI 翻译
 [Behaviour]
-MaxCharactersPerTranslation=200  ;Max characters per text to translate. Max 2500.
-IgnoreWhitespaceInDialogue=True  ;Whether or not to ignore whitespace, including newlines, in dialogue keys
-IgnoreWhitespaceInNGUI=True      ;Whether or not to ignore whitespace, including newlines, in NGUI
-MinDialogueChars=20              ;The length of the text for it to be considered a dialogue
-ForceSplitTextAfterCharacters=0  ;Split text into multiple lines once the translated text exceeds this number of characters
-CopyToClipboard=False            ;Whether or not to copy hooked texts to clipboard
-MaxClipboardCopyCharacters=450   ;Max number of characters to hook to clipboard at a time
-ClipboardDebounceTime=1.25       ;The number of seconds it takes for hooked text to reach the clipboard. Minimum is 0.1
-EnableUIResizing=True            ;Whether or not the plugin should provide a "best attempt" at resizing UI components upon translation
-EnableBatching=True              ;Indicates whether batching of translations should be enabled for supported endpoints
-UseStaticTranslations=True       ;Indicates whether or not to use translations from the included static translation cache
-OverrideFont=                    ;Overrides the fonts used for texts when updating text components. NOTE: Only works for UGUI
-OverrideFontTextMeshPro=         ;Consider using FallbackFontTextMeshPro instead. Overrides the fonts used for texts when updating text components. NOTE: Only works for TextMeshPro
-FallbackFontTextMeshPro=         ;Adds a fallback font for TextMeshPro in case a specific character is not supported. This is recommended over OverrideFontTextMeshPro
-ResizeUILineSpacingScale=        ;A decimal value that the default line spacing should be scaled by during UI resizing, for example: 0.80. NOTE: Only works for UGUI
-ForceUIResizing=True             ;Indicates whether the UI resize behavior should be applied to all UI components regardless of them being translated.
-IgnoreTextStartingWith=\u180e;   ;Indicates that the plugin should ignore any strings starting with certain characters. This is a list seperated by ';'.
-TextGetterCompatibilityMode=False ;Indicates whether or not to enable "Text Getter Compatibility Mode". Should only be enabled if required by the game. 
-GameLogTextPaths=                ;Indicates specific paths for game objects that the game uses as "log components", where it continuously appends or prepends text to. Requires expert knowledge to setup. This is a list seperated by ';'.
-RomajiPostProcessing=ReplaceMacronWithCircumflex;RemoveApostrophes;ReplaceHtmlEntities ;Indicates what type of post processing to do on 'translated' romaji texts. This can be important in certain games because the font used does not support various diacritics properly. This is a list seperated by ';'. Possible values: ["RemoveAllDiacritics", "ReplaceMacronWithCircumflex", "RemoveApostrophes", "ReplaceHtmlEntities"]
-TranslationPostProcessing=ReplaceMacronWithCircumflex;ReplaceHtmlEntities ;Indicates what type of post processing to do on translated texts (not romaji). Possible values: ["RemoveAllDiacritics", "ReplaceMacronWithCircumflex", "RemoveApostrophes", "ReplaceWideCharacters", "ReplaceHtmlEntities"]
-RegexPostProcessing=None         ;Indicates what type of post processing to perform on the capture groups of regexes. Possible values: ["RemoveAllDiacritics", "ReplaceMacronWithCircumflex", "RemoveApostrophes", "ReplaceWideCharacters", "ReplaceHtmlEntities"]
-CacheRegexLookups=False          ;Indicates whether or not results of regex lookups should be output to the specified OutputFile
-CacheWhitespaceDifferences=False ;Indicates whether or not whitespace differences should be output to the specified OutputFile
-CacheRegexPatternResults=False   ;Indicates whether or not the complete result of regex-splitted translations should be output to the specified OutputFile
-GenerateStaticSubstitutionTranslations=False ;Indicates that the plugin should generate translations without variables when using substitutions
-GeneratePartialTranslations=False ;Indicates that the plugin should generate partial translations to support text translations as it is "scrolling in"
-EnableTranslationScoping=False   ;Indicates the plugin should parse 'TARC' directives and scope translations based on these
-EnableSilentMode=False           ;Indicates the plugin should not print out success messages in relation to translations
-BlacklistedIMGUIPlugins=         ;If an IMGUI window assembly/class/method name contains any of the strings in this list (case insensitive) that UI will not be translated. Requires MonoMod hooks. This is a list seperated by ';'
-OutputUntranslatableText=False   ;Indicates if texts that are considered by the plugin to be untranslatable should be output to the specified OutputFile
-IgnoreVirtualTextSetterCallingRules=False; Indicates that rules for virtual method calls should be ignored when trying to set the text of a text component. May in some cases help setting the text of stubborn components
-MaxTextParserRecursion=1         ;Indicates how many levels of recursion are allowed when text is parsed so it can be translated in different parts. This can be used with splitter-regexes in advanced scenarios. The default value of one essentially means that recursion is disabled.
-HtmlEntityPreprocessing=True     ;Will preprocess and decode html entities before they are send for translation. Some translators will fail when html entities are sent.
-HandleRichText=True              ;Will enable automated handling of rich text (text with markup)
-PersistRichTextMode=Final        ;Indicates how parsed rich text should be persisted. Either 'Fragment' to store the the text piecemeal or 'Final' to store the entire translated string (does not support substitutions!)
-EnableTranslationHelper=False    ;Indicates if translator-related helpful log messages should be enabled. May be useful when tranlating based on redirected resources
-ForceMonoModHooks=False          ;Indicates that the plugin must use MonoMod hooks instead of harmony hooks
-InitializeHarmonyDetourBridge=False ;Indicates the plugin should initial harmony detour bridge which allows harmony hooks to work in an environment where System.Reflection.Emit does not exist (usually such settings are handled by plugin managers, so don't use when using a plugin manager)
-RedirectedResourceDetectionStrategy=AppendMongolianVowelSeparatorAndRemoveAll ;Indicates if and how the plugin should attempt to recognize redirected resources in order to prevent double translations. Can be ["None", "AppendMongolianVowelSeparator", "AppendMongolianVowelSeparatorAndRemoveAppended", "AppendMongolianVowelSeparatorAndRemoveAll"]
-OutputTooLongText=False          ;Indicates if the plugin should output text that exceeds 'MaxCharactersPerTranslation' without translating it
-
+MaxCharactersPerTranslation=200  ;每次翻译的最大字符数。最大为 2500。
+IgnoreWhitespaceInDialogue=True  ;是否忽略对话键中的空白，包括换行
+IgnoreWhitespaceInNGUI=True      ;是否忽略 NGUI 中的空白，包括换行
+MinDialogueChars=20              ;被视为对话的文本长度
+ForceSplitTextAfterCharacters=0  ;一旦翻译后的文本超过此字符数，就将文本拆分为多行
+CopyToClipboard=False            ;是否将挂钩的文本复制到剪贴板
+MaxClipboardCopyCharacters=450   ;一次挂钩到剪贴板的最大字符数
+ClipboardDebounceTime=1.25       ;挂钩的文本到达剪贴板所需的秒数。最小值为 0.1
+EnableUIResizing=True            ;插件是否应“尽力而为”地在翻译时调整 UI 组件大小
+EnableBatching=True              ;指示是否应为由支持的端点启用翻译批处理
+UseStaticTranslations=True       ;指示是否使用包含的静态翻译缓存中的翻译
+OverrideFont=                    ;更新文本组件时用于文本的替代字体。注意：仅对 UGUI 有效
+OverrideFontTextMeshPro=         ;考虑使用 FallbackFontTextMeshPro 代替。更新文本组件时用于文本的替代字体。注意：仅对 TextMeshPro 有效
+FallbackFontTextMeshPro=         ;为 TextMeshPro 添加备用字体，以防特定字符不受支持。推荐使用此选项代替 OverrideFontTextMeshPro
+ResizeUILineSpacingScale=        ;UI 调整大小时默认行间距应缩放的十进制值，例如：0.80。注意：仅对 UGUI 有效
+ForceUIResizing=True             ;指示 UI 调整大小行为是否应应用于所有 UI 组件，无论它们是否被翻译。
+IgnoreTextStartingWith=\u180e;   ;指示插件应忽略任何以特定字符开头的字符串。这是一个用“;”分隔的列表。
+TextGetterCompatibilityMode=False ;指示是否启用“文本获取器兼容模式”。仅在游戏需要时启用。
+GameLogTextPaths=                ;指示游戏用作“日志组件”的游戏对象的特定路径，游戏会不断向其中追加或前置文本。设置需要专业知识。这是一个用“;”分隔的列表。
+RomajiPostProcessing=ReplaceMacronWithCircumflex;RemoveApostrophes;ReplaceHtmlEntities ;指示对“翻译后的”罗马音文本执行的后处理类型。在某些游戏中这可能很重要，因为所用字体不支持各种变音符号。这是一个用“;”分隔的列表。可能的值：["RemoveAllDiacritics", "ReplaceMacronWithCircumflex", "RemoveApostrophes", "ReplaceHtmlEntities"]
+TranslationPostProcessing=ReplaceMacronWithCircumflex;ReplaceHtmlEntities ;指示对翻译后的文本（非罗马音）执行的后处理类型。可能的值：["RemoveAllDiacritics", "ReplaceMacronWithCircumflex", "RemoveApostrophes", "ReplaceWideCharacters", "ReplaceHtmlEntities"]
+RegexPostProcessing=None         ;指示对正则表达式的捕获组执行的后处理类型。可能的值：["RemoveAllDiacritics", "ReplaceMacronWithCircumflex", "RemoveApostrophes", "ReplaceWideCharacters", "ReplaceHtmlEntities"]
+CacheRegexLookups=False          ;指示正则表达式查找结果是否应输出到指定的 OutputFile
+CacheWhitespaceDifferences=False ;指示空白差异是否应输出到指定的 OutputFile
+CacheRegexPatternResults=False   ;指示正则表达式拆分的翻译的完整结果是否应输出到指定的 OutputFile
+GenerateStaticSubstitutionTranslations=False ;指示使用替换时，插件是否应生成不带变量的翻译
+GeneratePartialTranslations=False ;指示插件是否应生成部分翻译，以支持文本“滚动显示”时的翻译
+EnableTranslationScoping=False   ;指示插件应解析“TARC”指令并基于这些指令确定翻译范围
+EnableSilentMode=False           ;指示插件不应输出与翻译相关的成功消息
+BlacklistedIMGUIPlugins=         ;如果 IMGUI 窗口的程序集/类/方法名称包含此列表中的任何字符串（不区分大小写），则该 UI 将不被翻译。需要 MonoMod 钩子。这是一个用“;”分隔的列表
+OutputUntranslatableText=False   ;指示插件是否应将被视为不可翻译的文本输出到指定的 OutputFile
+IgnoreVirtualTextSetterCallingRules=False; 指示在尝试设置文本组件的文本时，是否忽略虚拟方法调用规则。在某些情况下可能有助于设置顽固组件的文本
+MaxTextParserRecursion=1         ;指示解析文本以使其能分不同部分翻译时允许的递归级别。这可在高级场景中与拆分器正则表达式一起使用。默认值 1 本质上意味着禁用递归。
+HtmlEntityPreprocessing=True     ;将在发送翻译前预处理和解码 html 实体。某些翻译器在收到 html 实体时会失败。
+HandleRichText=True              ;将启用富文本（带标记的文本）的自动处理
+PersistRichTextMode=Final        ;指示解析的富文本应如何持久化。“Fragment”表示零碎地存储文本，“Final”表示存储整个翻译后的字符串（不支持替换！）
+EnableTranslationHelper=False    ;指示是否启用与翻译器相关的有用日志消息。在基于重定向资源进行翻译时可能有用
+ForceMonoModHooks=False          ;指示插件必须使用 MonoMod 钩子而不是 harmony 钩子
+InitializeHarmonyDetourBridge=False ;指示插件应初始化 harmony detour 桥，这允许 harmony 钩子在不存在 System.Reflection.Emit 的环境中工作（通常此类设置由插件管理器处理，因此使用插件管理器时不要使用）
+RedirectedResourceDetectionStrategy=AppendMongolianVowelSeparatorAndRemoveAll ;指示插件是否以及如何尝试识别重定向的资源，以防止双重翻译。可能的值：["None", "AppendMongolianVowelSeparator", "AppendMongolianVowelSeparatorAndRemoveAppended", "AppendMongolianVowelSeparatorAndRemoveAll"]
+OutputTooLongText=False          ;指示插件是否应输出超过“MaxCharactersPerTranslation”的文本而不翻译它
 [Texture]
-TextureDirectory=Translation\{Lang}\Texture ;Directory to dump textures to, and root of directories to load images from. Can use placeholder: {GameExeName}, {Lang}
-EnableTextureTranslation=False   ;Indicates whether the plugin will attempt to replace in-game images with those from the TextureDirectory directory
-EnableTextureDumping=False       ;Indicates whether the plugin will dump texture it is capable of replacing to the TextureDirectory. Has significant performance impact
-EnableTextureToggling=False      ;Indicates whether or not toggling the translation with the ALT+T hotkey will also affect textures. Not guaranteed to work for all textures. Has significant performance impact
-EnableTextureScanOnSceneLoad=False ;Indicates whether or not the plugin should scan for textures on scene load. This enables the plugin to find and (possibly) replace more texture
-EnableSpriteRendererHooking=False ;Indicates whether or not the plugin should attempt to hook SpriteRenderer. This is a seperate option because SpriteRenderer can't actually be hooked properly and the implemented workaround could have a theoretical impact on performance in certain situations
-LoadUnmodifiedTextures=False     ;Indicates whether or not unmodified textures should be loaded. Modifications are determined based on the hash in the file name. Only enable this for debugging purposes as it is likely to cause oddities
-TextureHashGenerationStrategy=FromImageName ;Indicates how the mod identifies pictures through hashes. Can be ["FromImageName", "FromImageData", "FromImageNameAndScene"]
-DuplicateTextureNames=           ;Indicates specific texture names that are duplicated in the game. List is separated by ';'.
-DetectDuplicateTextureNames=False;Indicates if the plugin should detect duplicate texture names.
-EnableLegacyTextureLoading=False ;Indicates the plugin should use a different strategy to load images, that may be relevant if the game engine is old
-CacheTexturesInMemory=True       ;Indicates that all textures loaded should be kept in memory for optimal performance. Disable to decrease memory usage
-
+TextureDirectory=Translation\{Lang}\Texture ;用于转储纹理以及加载图像的目录根。可使用占位符：{GameExeName}、{Lang}
+EnableTextureTranslation=False   ;指示插件是否将尝试用 TextureDirectory 目录中的图像替换游戏中的图像
+EnableTextureDumping=False       ;指示插件是否将其能够替换的纹理转储到 TextureDirectory。对性能有显著影响
+EnableTextureToggling=False      ;指示使用 ALT+T 热键切换翻译时是否也会影响纹理。不保证对所有纹理都有效。对性能有显著影响
+EnableTextureScanOnSceneLoad=False ;指示插件是否应在场景加载时扫描纹理。这使插件能够找到并（可能）替换更多纹理
+EnableSpriteRendererHooking=False ;指示插件是否应尝试挂钩 SpriteRenderer。这是一个单独的选项，因为实际上无法正确挂钩 SpriteRenderer，所实现的解决方法在某些情况下可能会对性能产生理论上的影响
+LoadUnmodifiedTextures=False     ;指示是否应加载未修改的纹理。修改是根据文件名中的哈希确定的。仅在调试时启用此选项，因为它可能会导致异常情况
+TextureHashGenerationStrategy=FromImageName ;指示模组如何通过哈希识别图片。可能的值：["FromImageName", "FromImageData", "FromImageNameAndScene"]
+DuplicateTextureNames=           ;指示游戏中重复的特定纹理名称。列表用“;”分隔。
+DetectDuplicateTextureNames=False;指示插件是否应检测重复的纹理名称。
+EnableLegacyTextureLoading=False ;指示插件应使用不同的策略加载图像，这可能与旧版游戏引擎相关
+CacheTexturesInMemory=True       ;指示所有加载的纹理都应保存在内存中以获得最佳性能。禁用可减少内存使用
 [ResourceRedirector]
-PreferredStoragePath=Translation\{Lang}\RedirectedResources ;Indicates the preferred storage for redirected resources in relation to the Auto Translator. Can use placeholder: {GameExeName}, {Lang}
-EnableTextAssetRedirector=False  ;Indicates if TextAssets should be redirected
-LogAllLoadedResources=False      ;Indicates if the plugin should log to the console all loaded assets. Useful to determine what can be hooked
-EnableDumping=False              ;Indicates if translatable resources that are found should be dumped
-CacheMetadataForAllFiles=True    ;When files are in ZIP files in the PreferredStoragePath, these files are indexed in memory to avoid performing file check IO when loading them. Enabling this option will do the same for physical files
-
+PreferredStoragePath=Translation\{Lang}\RedirectedResources ;指示与自动翻译器相关的重定向资源的首选存储位置。可使用占位符：{GameExeName}、{Lang}
+EnableTextAssetRedirector=False  ;指示是否应重定向 TextAssets
+LogAllLoadedResources=False      ;指示插件是否应向控制台记录所有加载的资源。有助于确定可以挂钩的内容
+EnableDumping=False              ;指示是否应转储找到的可翻译资源
+CacheMetadataForAllFiles=True    ;当文件位于 PreferredStoragePath 中的 ZIP 文件中时，这些文件会在内存中建立索引，以避免加载时执行文件检查 IO。启用此选项也会对物理文件执行相同操作
 [Http]
-UserAgent=                       ;Override the user agent used by APIs requiring a user agent
-DisableCertificateValidation=False ;Indiciates whether certificate validations for the .NET API should be disabled
-
+UserAgent=                       ;覆盖需要用户代理的 API 所使用的用户代理
+DisableCertificateValidation=False ;指示是否应禁用 .NET API 的证书验证
 [TranslationAggregator]
-Width=400                        ;The total width of the translation aggregator window.
-Height=100                       ;The width (per translator) of the translation aggregator window.
-EnabledTranslators=              ;The id's of the translation endpoints that has been enabled in the translation aggregator window. List is separated by ';'.
-
+Width=400                        ;翻译聚合器窗口的总宽度。
+Height=100                       ;翻译聚合器窗口的（每个翻译器的）宽度。
+EnabledTranslators=              ;在翻译聚合器窗口中已启用的翻译端点的 ID。列表用“;”分隔。
 [Google]
-ServiceUrl=                      ;OPTIONAL, can be used to direct google API request to a different URL. Can be used to circumvent GFWoC
-
+ServiceUrl=                      ;可选，可用于将谷歌 API 请求定向到不同的 URL。可用于规避 GFWoC
 [GoogleLegitimate]
-GoogleAPIKey=                    ;OPTIONAL, needed if GoogleTranslateLegitimate is configured
-
+GoogleAPIKey=                    ;可选，如果配置了 GoogleTranslateLegitimate，则需要
 [BingLegitimate]
-OcpApimSubscriptionKey=          ;OPTIONAL, needed if BingTranslateLegitimate is configured
-
+OcpApimSubscriptionKey=          ;可选，如果配置了 BingTranslateLegitimate，则需要
 [Baidu]
-BaiduAppId=                      ;OPTIONAL, needed if BaiduTranslate is configured
-BaiduAppSecret=                  ;OPTIONAL, needed if BaiduTranslate is configured
-
+BaiduAppId=                      ;可选，如果配置了 BaiduTranslate，则需要
+BaiduAppSecret=                  ;可选，如果配置了 BaiduTranslate，则需要
 [Yandex]
-YandexAPIKey=                    ;OPTIONAL, needed if YandexTranslate is configured
-
+YandexAPIKey=                    ;可选，如果配置了 YandexTranslate，则需要
 [Watson]
-Url=                             ;OPTIONAL, needed if WatsonTranslate is configured
-Key=                             ;OPTIONAL, needed if WatsonTranslate is configured
-
+Url=                             ;可选，如果配置了 WatsonTranslate，则需要
+Key=                             ;可选，如果配置了 WatsonTranslate，则需要
 [DeepL]
-MinDelay=2                       ;OPTIONAL, used for throttling DeepL
-MaxDelay=7                       ;OPTIONAL, used for throttling DeepL
-
+MinDelay=2                       ;可选，用于限制 DeepL 的速率
+MaxDelay=7                       ;可选，用于限制 DeepL 的速率
 [DeepLLegitimate]
-ApiKey=                          ;OPTIONAL, required if DeepLLegitimate is configured
-Free=False                       ;OPTIONAL, required if DeepLLegitimate is configured
-
+ApiKey=                          ;可选，如果配置了 DeepLLegitimate，则需要
+Free=False                       ;可选，如果配置了 DeepLLegitimate，则需要
 [Custom]
-Url=                             ;Optional, needed if CustomTranslated is configured
-
+Url=                             ;可选，如果配置了 CustomTranslated，则需要
 [LecPowerTranslator15]
-InstallationPath=                ;Optional, needed if LecPowerTranslator15 is configured
-
+InstallationPath=                ;可选，如果配置了 LecPowerTranslator15，则需要
 [LingoCloud]
-LingoCloudToken=                 ;Optional, needed if LingoCloudTranslate is configured
-
+LingoCloudToken=                 ;可选，如果配置了 LingoCloudTranslate，则需要
 [Debug]
-EnableConsole=False              ;Enables the console. Do not enable if other plugins (managers) handles this
-EnableLog=False                  ;Enables extra logging for debugging purposes
-
+EnableConsole=False              ;启用控制台。如果其他插件（管理器）处理此功能，则不要启用
+EnableLog=False                  ;启用额外的调试日志
 [Migrations]
-Enable=True                      ;Used to enable automatic migrations of this configuration file
-Tag=4.15.0                        ;Tag representing the last version this plugin was executed under. Do not edit
+Enable=True                      ;用于启用此配置文件的自动迁移
+Tag=4.15.0                        ;表示上次执行此插件的版本的标记。请勿编辑
 ```
 
-### Behaviour Configuration Explanation
 
-#### Whitespace Handling
-This section describes configuration parameters that has an effect on whitespace handling before and after performing a translation. **None of these settings have an impact on the 'untranslated texts' that are placed in the auto generated translations file.**
+### 行为配置说明
+#### 空白处理
+本节介绍对翻译前后的空白处理有影响的配置参数。**这些设置都不会对放置在自动生成的翻译文件中的“未翻译文本”产生影响。**
 
-When it comes to automated translations, proper whitespace handling can really make or break the translation. The parameters that control whitespace handling are:
- * `IgnoreWhitespaceInDialogue`
- * `IgnoreWhitespaceInNGUI`
- * `MinDialogueChars`
- * `ForceSplitTextAfterCharacters`
+在自动翻译中，适当的空白处理确实会决定翻译的成败。控制空白处理的参数有：
+- `IgnoreWhitespaceInDialogue`
+- `IgnoreWhitespaceInNGUI`
+- `MinDialogueChars`
+- `ForceSplitTextAfterCharacters`
 
-The plugin first determines whether or not it should perform a special whitespace removal operation. It determines whether or not to perform this operation based on the parameters `IgnoreWhitespaceInDialogue`, `IgnoreWhitespaceInNGUI` and `MinDialogueChars`:
- * `IgnoreWhitespaceInDialogue`: If the text is longer than `MinDialogueChars`, whitespace is removed.
- * `IgnoreWhitespaceInNGUI`: If the text comes from an NGUI component, whitespace is removed.
+插件首先确定是否应执行特殊的空白删除操作。它根据参数 `IgnoreWhitespaceInDialogue`、`IgnoreWhitespaceInNGUI` 和 `MinDialogueChars` 来确定是否执行此操作：
+- `IgnoreWhitespaceInDialogue`：如果文本长于 `MinDialogueChars`，则删除空白。
+- `IgnoreWhitespaceInNGUI`：如果文本来自 NGUI 组件，则删除空白。
 
-After the text has been translated by the configured service, `ForceSplitTextAfterCharacters` is used to determine if the plugin should force the result into multiple lines after a certain number of characters.
+文本由配置的服务翻译后，`ForceSplitTextAfterCharacters` 用于确定插件是否应在特定字符数后将结果强制分为多行。
 
-The main reason that this type of handling can make or break a translation really comes down to whether or not whitespace is removed from the source text before sending it to the endpoint. Most endpoints (such as GoogleTranslate) consider text on multiple lines seperately, which can often result in terrible translation if an unnecessary newline is included.
+这种处理方式会决定翻译的成败，这实际上取决于在将源文本发送到端点之前是否从源文本中删除空白。大多数端点（如谷歌翻译）会分别考虑多行文本，这通常会导致如果包含不必要的换行，翻译结果会很糟糕。
 
-#### Text post/pre-processing
-While proper whitespace handling goes a long way in ensuring better translations, it is not always enough.
 
-The `PreprocessorsFile` allows defining entries that modifies the text just before it is sent to the translator.
+#### 文本预处理/后处理
+虽然适当的空白处理对确保更好的翻译大有帮助，但这并不总是足够的。
 
-The `PostprocessorsFile` allows defining entries that modifies the translated text just after it is received from the translator.
+`PreprocessorsFile` 允许定义在将文本发送到翻译器之前修改文本的条目。
 
-#### UI Resizing
-Often when performing a translation on a text component, the resulting text is larger than the original. This often means that there is not enough room in the text component for the result. This section describes ways to remedy that by changing important parameters of the text components.
+`PostprocessorsFile` 允许定义在从翻译器接收翻译后的文本之后修改文本的条目。
 
-By default, the plugin will attempt some basic auto-resizing behaviour, which are controlled by the following parameters: `EnableUIResizing`, `ResizeUILineSpacingScale`, `ForceUIResizing`, `OverrideFont` and `OverrideFontTextMeshPro`.
- * `EnableUIResizing`: Resizes the components when a translation is performed.
- * `ForceUIResizing`: Resizes all components at all times, period.
- * `ResizeUILineSpacingScale`: Changes the line spacing of resized components. UGUI only.
- * `OverrideFont`: Changes the font of all text components regardless of `EnableUIResizing` and `ForceUIResizing`. UGUI only.
- * `OverrideFontTextMeshPro`: Consider using `FallbackFontTextMeshPro` instead. Changes the font of all text components regardless of `EnableUIResizing` and `ForceUIResizing`. TextMeshPro only. This option is able to load a font in two different ways. If the specified string indicates a path within the game folder, then that file will be attempted to be loaded as an asset bundle (requires Unity 2018 or greater (or alternatively a custom asset bundle built specifically for the targeted game)). If not, it will be attempted to be loaded through the Resources API. Default resources that are often distributed with TextMeshPro are: `Fonts & Materials/LiberationSans SDF` or `Fonts & Materials/ARIAL SDF`.
- * `FallbackFontTextMeshPro`: Adds a fallback font that TextMesh Pro can use in case a specific character is not supported.
 
-An additional note on changing the font of TextMeshPro: You can download some pre-built asset bundles for Unity 2018 and 2019 in the release tab, but for now, they are not particularly well tested. If you want to try them out, simply download the .zip folder and put one of the font assets into the game folder. Then configure it up by writing the name of the file in the configuration file in `OverrideFontTextMeshPro`.
+#### UI 调整大小
+通常，对文本组件执行翻译时，结果文本比原始文本长。这通常意味着文本组件中没有足够的空间容纳结果。本节介绍通过更改文本组件的重要参数来解决此问题的方法。
 
-Resizing of a UI component does not refer to changing of it's dimensions, but rather how the component handles overflow. The plugin changes the overflow parameters such that text is more likely to be displayed.
+默认情况下，插件会尝试一些基本的自动调整大小行为，这些行为由以下参数控制：`EnableUIResizing`、`ResizeUILineSpacingScale`、`ForceUIResizing`、`OverrideFont` 和 `OverrideFontTextMeshPro`。
+- `EnableUIResizing`：翻译时调整组件大小。
+- `ForceUIResizing`：始终调整所有组件的大小。
+- `ResizeUILineSpacingScale`：更改调整大小的组件的行间距。仅适用于 UGUI。
+- `OverrideFont`：无论 `EnableUIResizing` 和 `ForceUIResizing` 如何，更改所有文本组件的字体。仅适用于 UGUI。
+- `OverrideFontTextMeshPro`：考虑使用 `FallbackFontTextMeshPro` 代替。无论 `EnableUIResizing` 和 `ForceUIResizing` 如何，更改所有文本组件的字体。仅适用于 TextMeshPro。此选项能够以两种不同方式加载字体。如果指定的字符串指示游戏文件夹中的路径，则将尝试将该文件作为资源包加载（需要 Unity 2018 或更高版本（或者专门为目标游戏构建的自定义资源包））。否则，将尝试通过 Resources API 加载它。TextMeshPro 通常分发的默认资源有：`Fonts & Materials/LiberationSans SDF` 或 `Fonts & Materials/ARIAL SDF`。
+- `FallbackFontTextMeshPro`：添加 TextMesh Pro 可使用的备用字体，以防特定字符不受支持。
 
-The configuratiaon `EnableUIResizing` and `ForceUIResizing` also control whether or not manual UI resize behaviour is enabled. See [this section](#ui-font-resizing) for more information.
+关于更改 TextMeshPro 的字体的额外说明：您可以在发布选项卡中下载一些为 Unity 2018 和 2019 预构建的资源包，但目前它们的测试并不充分。如果您想尝试，只需下载 .zip 文件夹并将其中一个字体资源放入游戏文件夹。然后通过在配置文件的 `OverrideFontTextMeshPro` 中写入文件名来进行配置。
 
-#### Reducing Translation Requests
-The following aims at reducing the number of requests send to the translation endpoint:
- * `EnableBatching`: Batches several translation requests into a single with supported endpoints.
- * `UseStaticTranslations`: Enables usage of internal lookup dictionary of various english-to-japanese terms.
- * `MaxCharactersPerTranslation`: Specifies the maximum length of a text to translate. Any texts longer than this is ignored by the plugin. Cannot be greater than 1000. **Never redistribute this mod with this value greater than 400**
+UI 组件的调整大小并不是指更改其尺寸，而是指组件处理溢出的方式。插件更改溢出参数，使文本更有可能被显示。
 
-#### Romaji 'translation'
-One of the possible values as output `Language` is 'romaji'. If you choose this as language, you will find that games often has problems showing the translations because the font does not understand the special characters used, for example the [macron diacritic](https://en.wikipedia.org/wiki/Macron_(diacritic)).
+配置 `EnableUIResizing` 和 `ForceUIResizing` 还控制是否启用手动 UI 调整大小行为。有关更多信息，请参见[本节](#ui-字体调整大小)。
 
-To rememdy this, post processing can be applied to translations when 'romaji' is chosen as `Language`. This is done through the option `RomajiPostProcessing`. This option is a ';'-seperated list of values:
- * `RemoveAllDiacritics`: Remove all diacritics from the translated text
- * `ReplaceMacronWithCircumflex`: Replaces the macron diacritic with a circumflex.
- * `RemoveApostrophes`: Some translators might decide to include apostrophes after the 'n'-character. Applying this option removes those.
- * `ReplaceWideCharacters`: Replaces wide-width japanese characters with standard ASCII characters
- * `ReplaceHtmlEntities`: Replaces all html entities with their unescaped character
 
-This type of post processing is also applied to normal translations, but instead uses the option `TranslationPostProcessing`, which can use the same values.
+#### 减少翻译请求
+以下旨在减少发送到翻译端点的请求数量：
+- `EnableBatching`：将多个翻译请求批处理为一个（由支持的端点）。
+- `UseStaticTranslations`：启用使用各种英日术语的内部查找字典。
+- `MaxCharactersPerTranslation`：指定要翻译的文本的最大长度。任何长于此的文本都会被插件忽略。不能大于 1000。**切勿将此值大于 400 的模组再分发**
 
-#### MonoMod Hooks
-MonoMod hooks are hooks are created at runtime, but not through the Harmony dependency. Harmony has two primary problems that these hooks attempt to solve:
- * Harmony cannot hook methods with no body.
- * Harmony cannot hook methods under the `netstandard2.0` API surface, which later versions of Unity can be build under.
 
-MonoMod solves both of these problems. In order to use MonoMod hooks the libraries `MonoMod.RuntimeDetours.dll`, `MonoMod.Utils.dll` and `Mono.Cecil.dll` must be available to the plugin. These are optional dependencies.
+#### 罗马音“翻译”
+输出 `Language` 的可能值之一是“romaji”（罗马音）。如果您选择此作为语言，您会发现游戏通常难以显示翻译，因为字体不理解所使用的特殊字符，例如[长音符号](https://en.wikipedia.org/wiki/Macron_(diacritic))。
 
-These are only available in the following packages:
- * `XUnity.AutoTranslator-BepInEx-{VERSION}.zip` (because all dependencies are distributed with BepInEx 5.x)
- * `XUnity.AutoTranslator-IPA-{VERSION}.zip` (because all dependencies are included in the package)
- * `XUnity.AutoTranslator-ReiPatcher-{VERSION}.zip` (because all dependencies are included in the package)
+为解决此问题，当选择“romaji”作为 `Language` 时，可以对翻译应用后处理。这通过选项 `RomajiPostProcessing` 完成。此选项是一个用“;”分隔的值列表：
+- `RemoveAllDiacritics`：从翻译后的文本中删除所有变音符号
+- `ReplaceMacronWithCircumflex`：将长音符号替换为 circumflex（音调符号）。
+- `RemoveApostrophes`：一些翻译器可能会在“n”字符后包含撇号。应用此选项会删除这些撇号。
+- `ReplaceWideCharacters`：将全角日语字符替换为标准 ASCII 字符
+- `ReplaceHtmlEntities`：将所有 html 实体替换为其未转义的字符
 
-They are not distributed in the BepInEx 4.x because of the potential for conflicts in mod packages for various games.
+这种后处理也适用于正常翻译，但使用选项 `TranslationPostProcessing`，它可以使用相同的值。
 
-The following configuration controls the MonoMod hooks:
- * `ForceMonoModHooks`: Forces the plugin to use MonoMod hooks over Harmony hooks.
 
-If MonoMod hooks are not forced they are only used if available and a given method cannot be hooked through Harmony for one of the two reasons mentioned above.
+#### MonoMod 钩子
+MonoMod 钩子在运行时创建，但不通过 Harmony 依赖项。Harmony 有两个主要问题，这些钩子试图解决：
+- Harmony 不能挂钩没有主体的方法。
+- Harmony 不能挂钩 `netstandard2.0` API 表面下的方法，而 Unity 的更高版本可以在此 API 表面下构建。
 
-#### Other Options
- * `TextGetterCompatibilityMode`: This mode fools the game into thinking that the text displayed is not translated. This is required if the game uses text displayed to the user to determine what logic to execute. You can easily determine if this is required if you can see the functionality works fine if you toggle the translation off (hotkey: ALT+T).
- * `IgnoreTextStartingWith`: Disable translation for any texts starting with values in this ';-separated' setting. The [default value](https://www.charbase.com/180e-unicode-mongolian-vowel-separator) is an invisible character that takes up no space.
- * `CopyToClipboard`: Copy text to translate to the clipboard to support tools such as Translation Aggregator.
- * `ClipboardDebounceTime`: The delay between hooking a text and it being copied to clipboard. This is to avoid spamming the clipboard. If multiple texts appear in this period they will be concatenated.
- * `EnableSilentMode`: Indicates the plugin should not print out success messages in relation to translations.
- * `BlacklistedIMGUIPlugins`: If an IMGUI window assembly/class/method name contains any of the strings in this list (case insensitive) that UI will not be translated. Requires MonoMod hooks. This is a list seperated by ';'.
- * `OutputUntranslatableText`: Indicates if texts that are considered by the plugin to be untranslatable should be output to the specified OutputFile. Enabling this may also output a lot of garbage to the `OutputFile` that should be deleted before potential redistribution. **Never redistribute the mod with this enabled.**
- * `IgnoreVirtualTextSetterCallingRules`: Indicates that rules for virtual method calls should be ignored when trying to set the text of a text component. May in some cases help setting the text of stubborn components.
- * `RedirectedResourceDetectionStrategy`: Indicates if and how the plugin should attempt to recognize redirected resources in order to prevent double translations. Can be ["None", "AppendMongolianVowelSeparator", "AppendMongolianVowelSeparatorAndRemoveAppended", "AppendMongolianVowelSeparatorAndRemoveAll"]
- * `OutputTooLongText`: Indicates if the plugin should output text that exceeds 'MaxCharactersPerTranslation' without translating it
+MonoMod 解决了这两个问题。为了使用 MonoMod 钩子，库 `MonoMod.RuntimeDetours.dll`、`MonoMod.Utils.dll` 和 `Mono.Cecil.dll` 必须可供插件使用。这些是可选依赖项。
 
-## IL2CPP Support
-While this plugin offers some level of IL2CPP support, it is by no means complete. The following differences can be observed/features are missing:
- * Subpar text hooking capabilities
- * TextGetterCompatibilityMode is not supported
- * Plugin-specific translations are not supported (yet)
- * IMGUI translations are not supported (yet)
- * Many other features are completely unproven
+这些仅在以下包中可用：
+- `XUnity.AutoTranslator-BepInEx-{版本号}.zip`（因为所有依赖项都随 BepInEx 5.x 分发）
+- `XUnity.AutoTranslator-IPA-{版本号}.zip`（因为所有依赖项都包含在包中）
+- `XUnity.AutoTranslator-ReiPatcher-{版本号}.zip`（因为所有依赖项都包含在包中）
 
-## Frequently Asked Questions
-> **Q: How do I disable auto translations?**  
-A: Select the empty endpoint when you press ALT+0 or set the configuration parameter `Endpoint=` to empty.
+它们不分布在 BepInEx 4.x 中，因为各种游戏的模组包中可能存在冲突。
 
-> **Q: How do I disable the plugin entirely?**  
-A: You can do so by deleting the "XUnity.AutoTranslator" directory in the "{GameDirectory}\BepInEx\plugins" directory. Avoid deleting the "XUnity.ResourceRedirector" directory as other plugins may depend on it.
+以下配置控制 MonoMod 钩子：
+- `ForceMonoModHooks`：强制插件使用 MonoMod 钩子而不是 Harmony 钩子。
 
-> **Q: The game stops working when this plugin applies translations.**  
-A: Try setting the following configuration parameter `TextGetterCompatibilityMode=True`.
+如果不强制使用 MonoMod 钩子，则仅在可用且由于上述两个原因之一无法通过 Harmony 挂钩给定方法时才使用它们。
 
-> **Q: Can this plugin translate other plugins/mods?**  
-A: Likely yes, see [here](#translating-mods).
 
-> **Q: How do I use CustomTranslate?**  
-A: If you have to ask, you probably can't. CustomTranslate is intended for developers of a translation service. They would be able to expose an API that conforms to CustomTranslate's API specification without needing to implement a custom ITranslateEndpoint in this plugin as well.
+#### 其他选项
+- `TextGetterCompatibilityMode`：此模式会让游戏认为显示的文本未被翻译。如果游戏使用显示给用户的文本来确定执行什么逻辑，则需要此模式。如果您切换翻译关闭（热键：ALT+T）时功能正常，您可以轻松确定是否需要此模式。
+- `IgnoreTextStartingWith`：禁用对此“;”分隔设置中值开头的任何文本的翻译。[默认值](https://www.charbase.com/180e-unicode-mongolian-vowel-separator)是一个不占空间的不可见字符。
+- `CopyToClipboard`：将待翻译文本复制到剪贴板，以支持翻译聚合器等工具。
+- `ClipboardDebounceTime`：挂钩文本与复制到剪贴板之间的延迟。这是为了避免剪贴板被垃圾信息塞满。如果在此期间出现多个文本，它们将被连接起来。
+- `EnableSilentMode`：指示插件不应输出与翻译相关的成功消息。
+- `BlacklistedIMGUIPlugins`：如果 IMGUI 窗口的程序集/类/方法名称包含此列表中的任何字符串（不区分大小写），则该 UI 将不被翻译。需要 MonoMod 钩子。这是一个用“;”分隔的列表。
+- `OutputUntranslatableText`：指示插件是否应将被视为不可翻译的文本输出到指定的 OutputFile。启用此选项可能还会向 `OutputFile` 输出大量垃圾内容，在可能再分发之前应删除这些内容。**切勿启用此选项再分发模组。**
+- `IgnoreVirtualTextSetterCallingRules`：指示在尝试设置文本组件的文本时，是否忽略虚拟方法调用规则。在某些情况下可能有助于设置顽固组件的文本。
+- `RedirectedResourceDetectionStrategy`：指示插件是否以及如何尝试识别重定向的资源，以防止双重翻译。可能的值：["None", "AppendMongolianVowelSeparator", "AppendMongolianVowelSeparatorAndRemoveAppended", "AppendMongolianVowelSeparatorAndRemoveAll"]
+- `OutputTooLongText`：指示插件是否应输出超过“MaxCharactersPerTranslation”的文本而不翻译它
 
-> **Q: Please provide support for translation service X.**  
-A: For now, additional support for services that does not require some form of authentication is unlikely. Do note though, that it is possible to implement custom translators independently of this plugin. And it takes remarkably little code to do so.
 
-## Translating Mods
-Often other mods UI are implemented through IMGUI. As you can see above, this is disabled by default. By changing the "EnableIMGUI" value to "True", it will start translating IMGUI as well, which likely means that other mods UI will be translated.
+## IL2CPP 支持
+虽然此插件提供一定程度的 IL2CPP 支持，但远非完整。可以观察到以下差异/缺少的功能：
+- 文本挂钩能力较差
+- 不支持 TextGetterCompatibilityMode
+- 尚不支持插件特定的翻译（尚未）
+- 不支持 IMGUI 翻译（尚未）
+- 许多其他功能完全未经证实
 
-It is also possible to provide plugin-specific translations. See next section.
 
-## Manual Translations
-When you use this plugin, you can always go to the file `Translation\{Lang}\Text\_AutoGeneratedTranslations.txt` (OutputFile) to edit any auto generated translations and they will show up the next time you run the game. Or you can press (ALT+R) to reload the translation immediately.
+## 常见问题
+> **问：如何禁用自动翻译？**  
+答：按 ALT+0 时选择空端点，或将配置参数 `Endpoint=` 设置为空。
 
-It is also worth noting that this plugin will read all text files (*.txt) in the `Translation` (Directory), so if you want to provide a manual translation, you can simply cut out texts from the `Translation\_AutoGeneratedTranslations.{lang}.txt` (OutputFile) and place them in new text files in order to replace them with a manual translation. These text files can also be placed in standard .zip archives.
+> **问：如何完全禁用插件？**  
+答：可以通过删除“{GameDirectory}\BepInEx\plugins”目录中的“XUnity.AutoTranslator”目录来实现。避免删除“XUnity.ResourceRedirector”目录，因为其他插件可能依赖它。
 
-In this context, the `Translation\{Lang}\Text\_AutoGeneratedTranslations.txt` (OutputFile) will always have the lowest priority when reading translations. So if the same translation is present in two places, it will not be the one from the (OutputFile) that is used.
+> **问：应用翻译时游戏停止工作。**  
+答：尝试设置以下配置参数 `TextGetterCompatibilityMode=True`。
 
-In some ADV engines text 'scrolls' into place slowly. Different techniques are used for this and in some instances if you want the translated text to be scrolling in instead of the untranslated text, you may need to set `GeneratePartialTranslations=True`. This should not be turned on unless required by the game.
+> **问：此插件可以翻译其他插件/模组吗？**  
+答：很可能可以，参见[此处](#翻译模组)。
 
-### Plugin-specific Manual Translations
-Often you may want to provide translations for other plugins that are not naturally translated. This is obviously also possible with this plugin as described in the previous section. But what if you want to provide translations that should be specific to that plugin because such translation would conflict with a different plugin/generic translation?
+> **问：如何使用 CustomTranslate？**  
+答：如果您要问这个问题，您可能无法使用。CustomTranslate 是为翻译服务的开发者设计的。他们能够公开符合 CustomTranslate API 规范的 API，而无需在此插件中实现自定义 ITranslateEndpoint。
 
-In order to add plugin-specific translations, simply create a `Plugins` directory in the text translation `Directory`. In this directory you can create a new directory for each plugin you want to provide plugin-specific translations for. The name of the directory should be the same as the dll name without the extension (.dll).
+> **问：请提供对翻译服务 X 的支持。**  
+答：目前，不太可能再支持不需要某种形式身份验证的服务。但请注意，可以独立于此插件实现自定义翻译器。而且实现所需的代码非常少。
 
-Within this directory you can create translations files as you normally would. In addition you can add the following directive in these files:
 
+## 翻译模组
+其他模组的 UI 通常通过 IMGUI 实现。如上所示，默认情况下此功能是禁用的。通过将“EnableIMGUI”值更改为“True”，它将开始翻译 IMGUI，这可能意味着其他模组的 UI 将被翻译。
+
+也可以提供插件特定的翻译。参见下一节。
+
+
+## 手动翻译
+使用此插件时，您始终可以转到文件 `Translation\{Lang}\Text\_AutoGeneratedTranslations.txt`（OutputFile）来编辑任何自动生成的翻译，下次运行游戏时它们将显示出来。或者您可以按（ALT+R）立即重新加载翻译。
+
+还值得注意的是，此插件将读取 `Translation`（Directory）中的所有文本文件（*.txt），因此如果您想提供手动翻译，只需从 `Translation\_AutoGeneratedTranslations.{lang}.txt`（OutputFile）中剪切文本并将它们放在新的文本文件中，以用手动翻译替换它们。这些文本文件也可以放在标准的 .zip 存档中。
+
+在这种情况下，`Translation\{Lang}\Text\_AutoGeneratedTranslations.txt`（OutputFile）在读取翻译时优先级始终最低。因此，如果同一翻译出现在两个地方，将不会使用来自（OutputFile）的翻译。
+
+在某些 ADV 引擎中，文本会缓慢“滚动”显示。实现此功能的技术各不相同，在某些情况下，如果您希望翻译后的文本而不是未翻译的文本滚动显示，可能需要设置 `GeneratePartialTranslations=True`。除非游戏需要，否则不应启用此选项。
+
+
+### 插件特定的手动翻译
+通常，您可能希望为其他未自然翻译的插件提供翻译。显然，如前一节所述，此插件也可以做到这一点。但是，如果您想提供特定于该插件的翻译，因为这样的翻译可能与其他插件/通用翻译冲突，该怎么办？
+
+要添加插件特定的翻译，只需在文本翻译 `Directory` 中创建一个 `Plugins` 目录。在该目录中，您可以为每个要提供插件特定翻译的插件创建一个新目录。目录名称应与 dll 名称相同（不带扩展名 .dll）。
+
+在该目录中，您可以像往常一样创建翻译文件。此外，您可以在这些文件中添加以下指令：
 ```
 #enable fallback
 ```
+这将允许插件特定的翻译 fallback 到插件提供的通用/自动翻译。此指令放在哪个翻译文件中并不重要，只需添加一次。
 
-This will allow the plugin-specific translations to fallback to the generic/automated translations provided by the plugin. It does not matter which translation file this directive is placed it and it only need to be added once.
-
-As a plugin author it is also possible to embed these translation files in your plugin and register them through code with the following API:
-
+作为插件作者，也可以将这些翻译文件嵌入到您的插件中，并通过以下 API 通过代码注册它们：
 ```csharp
 /// <summary>
-/// Entry point for manipulating translations that have been loaded by the plugin.
+/// 用于操作已由插件加载的翻译的入口点。
 ///
-/// Methods on this interface should be called during plugin initialization. Preferably during the Start callback.
+/// 应在插件初始化期间调用此接口上的方法。最好在 Start 回调期间。
 /// </summary>
 public static class TranslationRegistry
-{
     /// <summary>
-    /// Obtains the translations registry instance.
+    /// 获取翻译注册表实例。
     /// </summary>
     public static ITranslationRegistry Default { get; }
-}
-
 /// <summary>
-/// Interface for manipulating translation that have been loaded by the plugin.
+/// 用于操作已由插件加载的翻译的接口。
 /// </summary>
 public interface ITranslationRegistry
-{
     /// <summary>
-    /// Registers and loads the specified translation package.
+    /// 注册并加载指定的翻译包。
     /// </summary>
-    /// <param name="assembly">The assembly that the behaviour should be applied to.</param>
-    /// <param name="package">Package containing translations.</param>
+    /// <param name="assembly">行为应应用于的程序集。</param>
+    /// <param name="package">包含翻译的包。</param>
     void RegisterPluginSpecificTranslations( Assembly assembly, StreamTranslationPackage package );
-
     /// <summary>
-    /// Registers and loads the specified translation package.
+    /// 注册并加载指定的翻译包。
     /// </summary>
-    /// <param name="assembly">The assembly that the behaviour should be applied to.</param>
-    /// <param name="package">Package containing translations.</param>
+    /// <param name="assembly">行为应应用于的程序集。</param>
+    /// <param name="package">包含翻译的包。</param>
     void RegisterPluginSpecificTranslations( Assembly assembly, KeyValuePairTranslationPackage package );
-
     /// <summary>
-    /// Allow plugin-specific translation to fallback to generic translations.
+    /// 允许插件特定的翻译 fallback 到通用翻译。
     /// </summary>
-    /// <param name="assembly">The assembly that the behaviour should be applied to.</param>
+    /// <param name="assembly">行为应应用于的程序集。</param>
     void EnablePluginTranslationFallback( Assembly assembly );
-}
 ```
 
-### Substitutions
-It is also possible to add substitutions that are applied to found texts before translations are created. This is controlled through the `SubstitutionFile`, which uses the same format as normal translation text files, although things like regexes are not supported.
 
-This is useful for replacing names that are often translated incorrectly, etc.
+### 替换
+也可以添加在创建翻译之前应用于找到的文本的替换。这由 `SubstitutionFile` 控制，该文件使用与普通翻译文本文件相同的格式，但不支持正则表达式等。
 
-When using substitutions, the found occurrences will be parameterized in the generated translations, like so:
+这对于替换经常被错误翻译的名称等很有用。
 
+使用替换时，找到的匹配项将在生成的翻译中参数化，如下所示：
 ```
 私は{{A}}=I am {{A}}
 ```
+或者，如果使用配置 `GenerateStaticSubstitutionTranslations=True`，翻译将不会参数化。
 
-Alternatively, if the configuration `GenerateStaticSubstitutionTranslations=True` is used the translations will not be parameterized.
+创建手动翻译时，应像使用正则表达式一样谨慎使用此文件，因为它可能会影响性能。
 
-When creating manual translations, use this file as sparingly as you would use regexes, as it can have an effect on performance.
+*注意：如果要翻译的文本包含富文本，则目前无法对其进行参数化。*
 
-*NOTE: If the text to be translated includes rich text, it cannot currently be parameterized.*
 
-### Regex Usage
-Text translation files support regexes as well. Always remember to use regexes sparingly and scope them to avoid performance issues.
+### 正则表达式用法
+文本翻译文件也支持正则表达式。请始终记住谨慎使用正则表达式，并限定其范围以避免性能问题。
 
-Regexes can be applied to translations in two different ways. The following two sections describes these two ways:
+正则表达式可以通过两种不同的方式应用于翻译。以下两节描述了这两种方式：
 
-#### Standard Regex Translation
-Standard regex translation are simply regexes that applied directly onto a translatable text, if no direct lookup can be found.
 
+#### 标准正则表达式翻译
+标准正则表达式翻译只是直接应用于可翻译文本的正则表达式（如果找不到直接查找）。
 ```
 r:"^シンプルリング ([0-9]+)$"=Simple Ring $1
 ```
+这些通过未翻译文本以 'r:' 开头来识别。
 
-These are identified by the untranslated text starting with 'r:'.
 
-#### Splitter Regex
-Sometimes games likes to combine texts before displaying them on screen. This means that it can sometimes be hard to know what text to add to the translation file because it appears in a number of different ways.
+#### 拆分器正则表达式
+有时游戏喜欢在屏幕上显示文本之前将文本组合起来。这意味着有时很难知道要添加到翻译文件中的文本是什么，因为它以多种不同的方式出现。
 
-This section explores a solution to this by applying a regex to split the text to be translated into individual pieces before trying to make lookups for the specified texts.
+本节探讨通过在尝试查找指定文本之前应用正则表达式将待翻译文本拆分为单个部分来解决此问题的方法。
 
-For example, let's say an accessory (Simple Ring) would be translated with the following line `シンプルリング=Simple Ring`. Now lets say this appears in multiple textboxes throughout the game like `01 シンプルリング` and `02 シンプルリング`. Providing a standard regex in a translation file to handle this is not going to work because you would need a regex for each accessory and this would not be performant at all.
+例如，假设某个配件（Simple Ring）将用以下行翻译 `シンプルリング=Simple Ring`。现在假设它在游戏中的多个文本框中出现，如 `01 シンプルリング` 和 `02 シンプルリング`。在翻译文件中提供标准正则表达式来处理此问题是行不通的，因为您需要为每个配件使用一个正则表达式，而且这一点也不高效。
 
-However, if we split the translation before trying to make lookups it will allow us to only have a single simple translation in our file, like this: `シンプルリング=Simple Ring`.
+但是，如果我们在尝试查找之前拆分翻译，我们将只需要在文件中有一个简单的翻译，如下所示：`シンプルリング=Simple Ring`。
 
-Simply place the following regex in a translation file:
-
+只需在翻译文件中放置以下正则表达式：
 ```
 sr:"^([0-9]{2}) ([\S\s]+)$"=$1 $2
 ```
+这会将待翻译文本拆分为两部分，分别翻译它们，然后将它们重新组合起来。
 
-This will split up the text to be translated into two parts, translate them individually and put them back together.
+这些通过未翻译文本以 'sr:' 开头来识别。
 
-These are identified by the untranslated text starting with 'sr:'.
+还值得注意的是，如果配置得当，这种方法可以递归使用。这意味着它允许被正则表达式拆分用于翻译的各个字符串流入另一个拆分器正则表达式，依此类推。
 
-It is also worth noting that this methodology can be used recursively, if configured. This means that it allows the individual strings that were split for translations by a regex, to flow into another splitter regex, and so on.
-
-In addition to identifying each group by index, they can also be identified by a name, which allows groups to be completely additional. Let's take a look at an example that combines all of these things:
-
+除了通过索引识别每个组外，还可以通过名称识别它们，这允许组完全附加。让我们看一个结合了所有这些内容的示例：
 ```
 sr:"^\[(?<stat>[\w\s]+)(?<num_i>[\+\-]{1}[0-9]+)?\](?<after>[\s\S]+)?$"="[${stat}${num_i}]${after}"
 ```
+在这个例子中，有 3 个命名组，其中两个是可选的（标准正则表达式语法）。替换模式通过将名称用 `${}` 括起来来识别这些命名组。
 
-In this example there are 3 named groups, two of which are optional (standard regex syntax). The replacement pattern identifies these named group by surrounding the name with `${}`.
+如果标识符名称以 `_i` 结尾，则意味着该字符串将不会尝试被翻译，而是按原样传递。通常这并不是真正需要的，因为插件足够智能，能够确定是否应该翻译某些内容。
 
-If the identifier name ends in `_i` it means that the string will not be attempted to be translated, but rather transfered as is. Generally this is not really needed as the plugin is smart enough to determine if something should be translated or not.
-
-So what would this regex split? It would split strings like this:
-
+那么这个正则表达式会拆分什么呢？它会拆分像这样的字符串：
 ```
 [DEF+14][ATK+64][DEX+34][AGI]
 ```
+组 `(?<stat>[\w]+)(?<num_i>[\+\-]{1}[0-9]+)?` 匹配 `[]` 内的文本。如您所见，有两个组。第一个是必需的，表示文本。第二个是可选的，表示后面的正负号和数字。
 
-The group(s) `(?<stat>[\w]+)(?<num_i>[\+\-]{1}[0-9]+)?` matches the text inside the `[]`. As you can see there are two groups. The first is requried and represents the text. The second is optional and represents the plus-/minus sign and number that comes after.
+组 `(?<after>[\s\S]+)` 匹配后面的任何内容。因此，它会像翻译任何其他文本一样尝试翻译该文本，并且可能直接流回此拆分器正则表达式。
 
-The group `(?<after>[\s\S]+)` matches whatever comes after. Because of this, it will attempt to translate that text like any other, and that may flow directly back into this splitter regex.
 
-#### Regex Post Processing
-Using the configuration option `RegexPostProcessing`, it is also possible to apply post processing the to the groups of a regex. For `sr:` regexes they are only applied to groups where the identifier name ends in `_i`.
+#### 正则表达式后处理
+使用配置选项 `RegexPostProcessing`，也可以对正则表达式的组应用后处理。对于 `sr:` 正则表达式，仅将它们应用于名称以 `_i` 结尾的组。
 
-### UI Font Resizing
-It is also possible to manually control the font size of text components. This is useful when the translated text uses more space than the untranslated text.
 
-You can control this in files that end in `resizer.txt` placed in the translation `Directory`. This file takes a simply syntax like this:
+### UI 字体调整大小
+也可以手动控制文本组件的字体大小。当翻译后的文本比未翻译的文本占用更多空间时，这很有用。
 
+您可以在翻译 `Directory` 中以 `resizer.txt` 结尾的文件中控制此设置。此文件采用简单的语法，如下所示：
 ```
 CharaCustom/CustomControl/CanvasDraw=ChangeFontSizeByPercentage(0.5)
 ```
+在这些文件中，等号左边表示必须调整字体大小的组件的（部分）路径。右边表示要对这些文本执行的命令的“;”分隔列表。
 
-In these files, the left-hand side of the equals sign represents a (partial) path to the components that must have their fonts resized. The right-hand sized represent a ';'-separated list of the command to perform on those texts.
+在所示示例中，它会将指定路径下所有文本的字体大小减小到 50%。
 
-In the shown example it will reduce the font size of all texts below the specified path to 50%.
+与任何其他翻译文件一样，这些文件也支持翻译范围，如[本节](#翻译范围)所述。
 
-Like any other translation file, these files also support translation scoping, as decribed in [this section](#translation-scoping).
+存在以下类型的命令：
+- 将字体大小更改为静态大小的命令：
+  - `ChangeFontSizeByPercentage(double percentage)`：百分比是原始字体大小要缩减到的百分比。
+  - `ChangeFontSize(int size)`：大小是字体的新大小
+  - `IgnoreFontSize()`：可用于重置在非常“非特定”路径上设置的字体大小调整行为。
+- 控制自动调整大小的命令：
+  - `AutoResize(bool enabled, minSize, maxSize)`：其中 enabled 控制是否应启用自动调整大小行为。最后两个参数是可选的。
+    - minSize、maxSize 可能的值：[keep, none, 任何数字]
+- 控制行间距的命令（仅 UGUI）：
+  - `UGUI_ChangeLineSpacingByPercentage(float percentage)`
+  - `UGUI_ChangeLineSpacing(float lineSpacing)`
+- 控制水平溢出的命令（仅 UGUI）：
+  - `UGUI_HorizontalOverflow(string mode)` - 可能的值：[wrap, overflow]
+- 控制垂直溢出的命令（仅 UGUI）：
+  - `UGUI_VerticalOverflow(string mode)` - 可能的值：[truncate, overflow]
+- 控制溢出的命令（仅 TMP）：
+  - `TMP_Overflow(string mode)` - [可能的值](https://docs.unity3d.com/Packages/com.unity.textmeshpro@3.0/api/TMPro.TextOverflowModes.html)
+- 控制文本对齐的命令（仅 TMP）：
+  - `TMP_Alignment(string mode)` - [可能的值](https://docs.unity3d.com/Packages/com.unity.textmeshpro@3.0/api/TMPro.TextAlignmentOptions.html)
 
-The following types of commands exists:
- * Commands that change the font size to a static size:
-   * `ChangeFontSizeByPercentage(double percentage)`: Where the percentage is the percentage of the original font size to reduce it to.
-   * `ChangeFontSize(int size)`: Where the size if the new size of the font
-   * `IgnoreFontSize()`: This can be used to reset font resize behavior that was set on a very 'non-specific' path.
- * Commands that control auto-resizing:
-   * `AutoResize(bool enabled, minSize, maxSize)`: Where enabled control if auto-resize behaviour should be enabled. The two last parameters are optional.
-     * minSize, maxSize possible values: [keep, none, any number]
- * Commands that control the line spacing (UGUI only):
-   * `UGUI_ChangeLineSpacingByPercentage(float percentage)`
-   * `UGUI_ChangeLineSpacing(float lineSpacing)`
- * Commands that control horizontal overflow (UGUI only):
-   * `UGUI_HorizontalOverflow(string mode)` - possible values: [wrap, overflow]
- * Commands that control vertical overflow (UGUI only):
-   * `UGUI_VerticalOverflow(string mode)` - possible values: [truncate, overflow]
- * Commands to control overflow (TMP only):
-   * `TMP_Overflow(string mode)` - [possible values](https://docs.unity3d.com/Packages/com.unity.textmeshpro@3.0/api/TMPro.TextOverflowModes.html)
- * Commands to control text alignment (TMP only):
-   * `TMP_Alignment(string mode)` - [possible values](https://docs.unity3d.com/Packages/com.unity.textmeshpro@3.0/api/TMPro.TextAlignmentOptions.html)
+但是您可能会问！我如何确定要使用的路径？此插件无法轻松确定这一点，但有其他插件可以让您做到这一点。
 
-But stop you say! How would I determine the path to use? This plugin provides no way to easily determine this, but there are other plugins that will allow you to do this.
+有两种方法，您可能需要同时使用它们：
+- 使用 [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor) 来确定这些。
+- 启用选项 `[Behaviour] EnableTextPathLogging=True`，这将记录所有文本被更改的文本组件的路径。
 
-There's two ways, and you will likely need to use both of them:
- * Using [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor) to determine these.
- * Enabling the option `[Behaviour] EnableTextPathLogging=True`, which will log out the path to all text components that text are changed on.
 
-### Translation Scoping
-The following two options are available when it comes to scoping translations to only part of the game:
+### 翻译范围
+有两种选项可用于将翻译范围限定到游戏的仅一部分：
 
-The translation files support the following directives:
- * `#set level 1,2,3` tells the plugin that translations following this line in this file may only be applied in scenes with ID 1, 2 or 3.
- * `#unset level 1,2,3` tells the plugin that translations following this line in this file should not be applied in scenes with ID 1, 2 or 3. If no levels are set, all specified translations are global.
- * `#set exe game1,game2` tells the plugin that translations following this line in this file may only be applied when the game is run through an executable with the name game1 or game2.
- * `#unset exe game1,game2` tells the plugin that translations following this line in this file should not be applied when the game is run through an executable with the name game1 or game2. If no exes are set, all specified translations are global.
- * `#set required-resolution height > 1280 && width > 720` tells the plugin that translations following this line in this file should only be applied if the resolution is greater than specified. Current implementation only handles the resolution used by the game at startup.
- * `#unset required-resolution` tells the plugin to ignore previously specified `#set required-resolution` directive.
+翻译文件支持以下指令：
+- `#set level 1,2,3` 告诉插件，此文件中此行后面的翻译只能应用于 ID 为 1、2 或 3 的场景中。
+- `#unset level 1,2,3` 告诉插件，此文件中此行后面的翻译不应应用于 ID 为 1、2 或 3 的场景中。如果未设置级别，则所有指定的翻译都是全局的。
+- `#set exe game1,game2` 告诉插件，此文件中此行后面的翻译只能应用于通过名为 game1 或 game2 的可执行文件运行游戏时。
+- `#unset exe game1,game2` 告诉插件，此文件中此行后面的翻译不应应用于通过名为 game1 或 game2 的可执行文件运行游戏时。如果未设置可执行文件，则所有指定的翻译都是全局的。
+- `#set required-resolution height > 1280 && width > 720` 告诉插件，此文件中此行后面的翻译仅应在分辨率大于指定值时应用。当前实现仅处理游戏启动时使用的分辨率。
+- `#unset required-resolution` 告诉插件忽略先前指定的 `#set required-resolution` 指令。
 
-For this to work, the following configuration option must be `True`:
-
+要使此功能生效，必须将以下配置选项设置为 `True`：
 ```
 [Behaviour]
 EnableTranslationScoping=True
 ```
 
-Also, this behaviour is not available in the `OutputFile`.
+此外，此行为在 `OutputFile` 中不可用。
 
-You can always see which levels are loaded by using the hotkey CTRL+ALT+NP7.
+您可以随时使用热键 CTRL+ALT+NP7 查看加载了哪些级别。
 
-Another way of scoping translations are through file names. It is possible to tell the plugin where to look for translation files. It is possible to parameterize these paths with the variable {GameExeName}.
+另一种确定翻译范围的方法是通过文件名。可以告诉插件在哪里查找翻译文件。可以使用变量 {GameExeName} 对这些路径进行参数化。
 
-Example configuration that seperates translations for each executable:
-
+为每个可执行文件分离翻译的配置示例：
 ```
 [Files]
 Directory=Translation\{GameExeName}\{Lang}\Text
@@ -775,33 +755,34 @@ Directory=Translation\{GameExeName}\{Lang}\Text\_AutoGeneratedTranslations.txt
 Directory=Translation\{GameExeName}\{Lang}\Text\_Substitutions.txt
 ```
 
-So when should use scope your translations? Well that depends on the type of scope:
- * `level` scopes should really only be used to avoid translation collisions
- * `exe` scopes can be used both to avoid translation collisions and to enhance performance
+那么什么时候应该确定翻译的范围呢？这取决于范围的类型：
+- `level` 范围实际上只应用于避免翻译冲突
+- `exe` 范围既可用于避免翻译冲突，也可用于提高性能
 
-### Text Lookup and Whitespace Handling
-This section is provided to give the translator an understanding of how this plugin looks up texts and provides translations.
 
-In the simplest form, the way the plugin works is as a dictionary of untranslated text strings. When plugin sees a text that it considers untranslated, it will attempt to look up the text string in the dictionary and if it finds a result, it will display the found translation instead.
+### 文本查找和空白处理
+提供本节是为了让翻译人员了解此插件如何查找文本并提供翻译。
 
-The world, however, is not always that simple. Depending on the engine/text framework used by a game, an untranslated text string may be slightly different when used in different contexts. For example for a VN it may not be the exact same text string that appears in the "ADV history"-view as it was when it was being initially displayed to the user.
+在最简单的形式中，插件的工作方式类似于未翻译文本字符串的字典。当插件看到它认为未翻译的文本时，它会尝试在字典中查找该文本字符串，如果找到结果，它将显示找到的翻译。
 
-**Example:**
+然而，情况并非总是如此简单。根据游戏使用的引擎/文本框架，在不同上下文中使用时，未翻译的文本字符串可能会略有不同。例如，对于视觉小说，在“ADV 历史”视图中出现的文本字符串可能与最初显示给用户时的文本字符串不完全相同。
+
+**示例：**
 ```
 「こう見えて怒っているんですよ？……失礼しますね」
 「こう見えて怒っているんですよ？\n ……失礼しますね」
 ```
 
-These text strings are not the same and it would be annoying having to translate the same text multiple times if the final translation is supposed to be the same. 
+这些文本字符串不相同，如果最终翻译应该相同，却要多次翻译相同的文本，会很麻烦。
 
-In fact, only one of these translations are needed. Here's why: (still very much simplified):
- 1. When the plugin sees an untranslated text, it will actually make four lookups, not one. These are, in order:
-    * Based on the untouched original text
-    * Based on the original text but without leading/trailing whitespace. If found the leading/trailing whitespace is added to the resulting translation
-    * Based on the original text but without internal non-repeating whitespace surrounding a newline
-    * Based on the original text but without leading/trailing whitespace and internal non-repeating whitespace surrounding a newline. If found the leading/trailing whitespace is added to the resulting translation
+事实上，只需要其中一个翻译。原因如下（仍然非常简化）：
+1. 当插件看到未翻译的文本时，它实际上会进行四次查找，而不是一次。按顺序如下：
+   - 基于未修改的原始文本
+   - 基于原始文本但没有前导/尾随空白。如果找到，前导/尾随空白将添加到结果翻译中
+   - 基于原始文本但没有围绕换行符的内部非重复空白
+   - 基于原始文本但没有前导/尾随空白以及围绕换行符的内部非重复空白。如果找到，前导/尾随空白将添加到结果翻译中
 
-This means that for the following string `\n 「こう見えて怒っているんですよ？\n ……失礼しますね」` the plugin will make the following lookups:
+这意味着对于以下字符串 `\n 「こう見えて怒っているんですよ？\n ……失礼しますね」`，插件将进行以下查找：
 ```
 \n 「こう見えて怒っているんですよ？\n ……失礼しますね」
 「こう見えて怒っているんですよ？\n ……失礼しますね」
@@ -809,68 +790,70 @@ This means that for the following string `\n 「こう見えて怒っている�
 「こう見えて怒っているんですよ？……失礼しますね」
 ```
 
- 2. When the plugin loads the (manual/automatic) translation it will not make one dictionary entry, but three. These are:
-    * Based on the untouched original text and original translation
-    * Based on the original text (without leading/trailing whitespace) and original translation (without leading/trailing whitespace)
-    * Based on the original text (without leading/trailing whitespace and internal non-repeating whitespace surrounding a newline) and original translation (without leading/trailing whitespace and internal non-repeating whitespace surrounding a newline)
-   
-This means that for the following string `\n 「こう見えて怒っているんですよ？\n ……失礼しますね」` the plugin will make the following entries:
+2. 当插件加载（手动/自动）翻译时，它不会创建一个字典条目，而是三个。它们是：
+   - 基于未修改的原始文本和原始翻译
+   - 基于原始文本（无前后空白）和原始翻译（无前后空白）
+   - 基于原始文本（无前后空白和围绕换行符的内部非重复空白）和原始翻译（无前后空白和围绕换行符的内部非重复空白）
+
+这意味着对于以下字符串 `\n 「こう見えて怒っているんですよ？\n ……失礼しますね」`，插件将创建以下条目：
 ```
 \n 「こう見えて怒っているんですよ？\n ……失礼しますね」
 「こう見えて怒っているんですよ？\n ……失礼しますね」
 「こう見えて怒っているんですよ？……失礼しますね」
 ```
 
-This means you can get away with providing a single translation for both of these cases. Which you think is better is up to you.
+这意味着您可以为这两种情况提供一个翻译。您认为哪种更好取决于您自己。
 
-Another thing to note is that the plugin will always output the original text without modifications in the translation file. But if it sees another text afterwards that is "compatible" with that text-string (due to the above mentioned text modifications) it will not output this new text by default.
+另一件需要注意的是，插件将始终在翻译文件中输出未修改的原始文本。但是，如果之后它看到另一个由于上述文本修改而与此文本字符串“兼容”的文本，默认情况下它不会输出这个新文本。
 
-This is controlled by the configuration option `CacheWhitespaceDifferences=False`. You can change this to true, and it will output a new entry for each unique text, even if the only differences are whitespace. Obviously, translations-pairs actually appearing in the translation file will always that precendent over translations-pairs that are generated based on an exinsting translation-pair.
+这由配置选项 `CacheWhitespaceDifferences=False` 控制。您可以将其更改为 true，它将为每个唯一文本输出一个新条目，即使唯一的差异是空白。显然，实际出现在翻译文件中的翻译对将始终优先于基于现有翻译对生成的翻译对。
 
-*NOTE: Whitespace differences in relation to level-scoped translations will never be output regardless of this setting.*
+*注意：无论此设置如何，与级别范围翻译相关的空白差异都不会输出。*
 
-### Resource Redirection
-Sometimes it's easier to provide a translation to a game by directly overriding the game resource files. However, directly overriding the game resource files is also problematic because that means the modification will likely only work for one version of the game.
 
-To overcome this problem, and allow for modification of resource files, this plugin also has a resource redirector module that allows redirecting any kind of resource loaded by the game.
+### 资源重定向
+有时，通过直接覆盖游戏资源文件来为游戏提供翻译更容易。然而，直接覆盖游戏资源文件也有问题，因为这意味着修改可能只适用于游戏的一个版本。
 
-Before we get into the details of this module, it is worth mentioning that it is:
- * It is not a plugin. Rather it is just a library that is not beholden to any plugin manager (it does come with a plugin-compatible BepInEx DLL but this is only to manage configuration).
- * It is game independent.
- * And while it may be redistributed with the Auto Translator, it is completely independent from it and it can be used without having the Auto Translator installed.
+为克服此问题并允许修改资源文件，此插件还具有资源重定向器模块，允许重定向游戏加载的任何类型的资源。
 
-The DLLs required for the Resource Redirector to work are `XUnity.Common.dll` and `XUnity.ResourceRedirector.dll`. By themselves, these libraries do nothing.
+在深入了解此模块的细节之前，值得一提的是：
+- 它不是插件。相反，它只是一个不依赖于任何插件管理器的库（它确实附带了一个与插件兼容的 BepInEx DLL，但这只是为了管理配置）。
+- 它与游戏无关。
+- 虽然它可以与自动翻译器一起再分发，但它完全独立于自动翻译器，可以在不安装自动翻译器的情况下使用。
 
-By default the Auto Translator plugin comes with one resource redirector for `TextAsset`, which basically outputs the raw text assets to the file system allowing them to be individually overridden.
+资源重定向器工作所需的 DLL 是 `XUnity.Common.dll` 和 `XUnity.ResourceRedirector.dll`。就其本身而言，这些库没有任何作用。
 
-More redirectors can be implemented for specific games, though this does require programming knowledge, see [this section](#implementing-a-resource-redirector) for more information.
+默认情况下，自动翻译器插件附带一个用于 `TextAsset` 的资源重定向器，它基本上将原始文本资源输出到文件系统，允许单独覆盖它们。
 
-The Auto Translator has the following Resource Redirector-specific configuration:
- * `PreferredStoragePath`: Indicates where the Auto Translator should store redirected resources.
- * `EnableTextAssetRedirector`: Indicates if the TextAsset redirector is enabled.
- * `LogAllLoadedResources`: Indicates if Resource Redirector should log all resources to the console (can also be controlled through Resource Redirector API surface).
- * `EnableDumping`: Indicates if resources redirected to the Auto Translator should be dumped for overwriting if possible.
- * `CacheMetadataForAllFiles`: When files are in ZIP files in the PreferredStoragePath, these files are indexed in memory to avoid performing file check IO when loading them. Enabling this option will do the same for physical files
+可以为特定游戏实现更多重定向器，但这需要编程知识，有关更多信息，请参见[本节](#实现资源重定向器)。
 
-ZIP files that are placed in the `PreferredStoragePath` will be indexed during startup, allowing redirected resources to be compressed and zipped. When files are placed in a zip file, the zip file is simply treated as not existing during file lookup.
+自动翻译器具有以下特定于资源重定向器的配置：
+- `PreferredStoragePath`：指示自动翻译器应存储重定向资源的位置。
+- `EnableTextAssetRedirector`：指示是否启用 TextAsset 重定向器。
+- `LogAllLoadedResources`：指示资源重定向器是否应将所有资源记录到控制台（也可通过资源重定向器 API 表面控制）。
+- `EnableDumping`：指示重定向到自动翻译器的资源是否应被转储以便可能覆盖。
+- `CacheMetadataForAllFiles`：当文件位于 PreferredStoragePath 中的 ZIP 文件中时，这些文件会在内存中建立索引，以避免加载时执行文件检查 IO。启用此选项也会对物理文件执行相同操作
 
-## Regarding Redistribution
-Redistributing this plugin for various games is absolutely encouraged. However, if you do so, please keep the following in mind:
- * **Distribute the _AutoGeneratedTranslations.txt file along with the redistribution with as many translations as possible to ensure the online translator is hit as little as possible.**
- * **Test your redistribution with logging/console enabled to ensure the game does not exhibit undesirable behaviour such as spamming the endpoints.**
- * Do not redistribute the plugin with a non-default translation endpoint configured which comes from this repository. This means:
-   * Don't set `Endpoint=DeepLTranslate` and then redistribute.
-   * However, if you implemented your own endpoint or the endpoint is not a part of this repository, you can go ahead and redistribute it with that as the default endpoint.
- * Ensure you keep the plugin up-to-date, as much as reasonably possible.
- * If you use image loading feature, make sure you read [this section](#texture-translation).
+放在 `PreferredStoragePath` 中的 ZIP 文件将在启动期间建立索引，允许重定向的资源被压缩和打包。当文件放在 zip 文件中时，在文件查找期间，zip 文件被视为不存在。
 
-## Texture Translation
-From version 2.16.0+ this mod provides basic capabilities to replace images. It is a feature that is disabled by default. There is no automatic translation of these images though.
 
-This feature is primarily meant for games with little to no mod support to enable full translations without needing to modify resource files.
+## 关于再分发
+非常鼓励为各种游戏再分发此插件。但是，如果您这样做，请记住以下几点：
+- **将 _AutoGeneratedTranslations.txt 文件与再分发一起分发，并包含尽可能多的翻译，以确保对在线翻译器的访问尽可能少。**
+- **通过启用日志/控制台测试您的再分发，以确保游戏不会表现出不良行为，例如向端点发送垃圾信息。**
+- 不要再分发配置了非默认翻译端点的插件，该端点来自此存储库。这意味着：
+  - 不要设置 `Endpoint=DeepLTranslate` 然后再分发。
+  - 但是，如果您实现了自己的端点或者该端点不是此存储库的一部分，您可以继续并将其作为默认端点再分发。
+- 确保尽可能保持插件为最新版本。
+- 如果您使用图像加载功能，请确保阅读[本节](#纹理翻译)。
 
-It is controlled by the following configuration:
 
+## 纹理翻译
+从 2.16.0 版本开始，此模组提供替换图像的基本功能。此功能默认禁用。不过，这些图像没有自动翻译功能。
+
+此功能主要用于几乎没有模组支持的游戏，以实现完整翻译，而无需修改资源文件。
+
+它由以下配置控制：
 ```ini
 [Texture]
 TextureDirectory=Translation\Texture
@@ -887,1749 +870,16 @@ EnableLegacyTextureLoading=False
 CacheTexturesInMemory=True
 ```
 
-`TextureDirectory` specifies the directory where textures are dumped to and loaded from. Loading will happen from all subdirectories of the specified directory as well, so you can move dumped images to whatever folder structure you desire.
+`TextureDirectory` 指定转储纹理和加载图像的目录。加载也会从指定目录的所有子目录中进行，因此您可以将转储的图像移动到任何您想要的文件夹结构中。
 
-`EnableTextureTranslation` enables texture translation. This basically means that textures will be loaded from the `TextureDirectory` and it's subsdirectories. These images will replace the in-game images used by the game.
+`EnableTextureTranslation` 启用纹理翻译。这基本上意味着纹理将从 `TextureDirectory` 及其子目录中加载。这些图像将替换游戏中使用的图像。
 
-`EnableTextureDumping` enables texture dumping. This means that the mod will dump any images it has not already dumped to the `TextureDirectory`. When dumping textures, it may also be worth enabling `EnableTextureScanOnSceneLoad` to more quickly find all textures that require translating. **Never redistribute the mod with this enabled.**
+`EnableTextureDumping` 启用纹理转储。这意味着模组将把所有尚未转储的图像转储到 `TextureDirectory`。转储纹理时，可能还值得启用 `EnableTextureScanOnSceneLoad` 以更快地找到所有需要翻译的纹理。**切勿启用此选项再分发模组。**
 
-`EnableTextureScanOnSceneLoad` allows the plugin to scan for texture objects on the sceneLoad event. This enables the plugin to find more texture at a tiny performance cost during scene load (which is often during loading screens, etc.). However, because of the way Unity works not all of these are guaranteed to be replacable. If you find an image that is dumped but cannot be translated, please report it. However, please recognize this mod is primarily intended for replacing UI textures, not textures for 3D meshes.
+`EnableTextureScanOnSceneLoad` 允许插件在 sceneLoad 事件上扫描纹理对象。这使插件能够以在场景加载期间（通常在加载屏幕等期间）微小的性能成本找到更多纹理。然而，由于 Unity 的工作方式，不能保证所有这些纹理都可以替换。如果您发现一个已转储但无法翻译的图像，请报告。但是，请认识到此模组主要用于替换 UI 纹理，而不是 3D 网格的纹理。
 
-`EnableSpriteRendererHooking` allows the plugin to attempt to hook SpriteRenderer. This is a seperate option because SpriteRenderer can't actually be hooked properly and the implemented workaround could have a theoretical impact on performance in certain situations.
+`EnableSpriteRendererHooking` 允许插件尝试挂钩 SpriteRenderer。这是一个单独的选项，因为实际上无法正确挂钩 SpriteRenderer，所实现的解决方法在某些情况下可能会对性能产生理论上的影响。
 
-`LoadUnmodifiedTextures` enables whether or not the plugin should load textures that has not been modified. This is only useful for debugging, and likely to cause various visual glitches, especially if `EnableTextureScanOnSceneLoad` is also enabled. **Never redistribute the mod with this enabled.**
+`LoadUnmodifiedTextures` 启用插件是否应加载未修改的纹理。这仅用于调试，并且可能导致各种视觉故障，特别是如果 `EnableTextureScanOnSceneLoad` 也启用的话。**切勿启用此选项再分发模组。**
 
-`EnableTextureToggling` enables whether the ALT+T hotkey will also toggle textures. This is by no means guaranteed to work, especially if `EnableTextureScanOnSceneLoad` is also enabled. **Never redistribute the mod with this enabled.**
-
-`DuplicateTextureNames` specifies different textures in the game that are used under the same resource name. The plugin will fallback to the 'FromImageData' for image identification for these images.
-
-`DetectDuplicateTextureNames` specifies that the plugin should identify which image names are duplicated and update the configuration with these names automatically. **Never redistribute the mod with this enabled.**
-
-`EnableLegacyTextureLoading` specifies that the plugin should use attempt to load images differently, which may be relevant if the unity engine is old (verified with versions less than 5.3). This should not be used unless the images that are loaded are not the ones that you expected.
-
-`CacheTexturesInMemory` specifies that all translation textures should be kept in memory to optimize performance. Can be disabled to reduce memory usage.
-
-`TextureHashGenerationStrategy` specifies how images are identified. When images are stored, the game will need some way of associating them with the image that it has to replace.
-This is done through a hash-value that is stored in square brackets in each image file name, like this: `file_name [0223B639A2-6E698E9272].png`. This configuration specifies how these hash-values are generated:
- * `FromImageName` means that the hash is generated from the internal resource name that the game uses for the image, which may not exist for all images or even be unique. However, it is generally fairly reliable. If an image has no resource name, it will not be dumped.
- * `FromImageData` means that the hash is generated from the data stored in the image, which is guaranteed to exist for all images. However, generating the hash comes at a performance cost, that will also be incurred by the end-users.
- * `FromImageNameAndScene` means that it should use the name and scene to generate a hash. The name is still required for this to work. When using this option, there is a chance the same texture could be dumped with different hashes, which is undesirable, but it could be required for some games, if the name itself is not unique and the `FromImageData` option causes performance issues. If this is used, it is recommended to enable `EnableTextureScanOnSceneLoad` as well.
-
-There's an important catch you need to be aware when dealing with these options and that is if ANY of these options exists: `EnableTextureDumping=True`, `EnableTextureToggling=True`, `TextureHashGenerationStrategy=FromImageData`, then the game will need to read the raw data from all images it finds in game in order to replace the image and this is an expensive operation.
-
-It is therefore recommended to use `TextureHashGenerationStrategy=FromImageName`. Most likely, images without a resource name won't be interesting to translate anyway.
-
-If you redistribute this mod with translated images, it is recommended you delete all images you either have no intention of translating or are not translated at all.
-
-You can also change the file name to whatever you desire, as long as you keep the hash appended to the end of the file name.
-
-If you take anything away from this section, it should be these two points:
- * **Never redistribute the mod with `EnableTextureDumping=True`, `EnableTextureToggling=True`, `LoadUnmodifiedTextures=True` or `DetectDuplicateTextureNames=true`**
- * **Only redistribute the mod with `TextureHashGenerationStrategy=FromImageData` enabled if absolutely required by the game.**
-
-### Technical details about Hash Generation in file names
-There are actually two hashes in the generated file name, separated by a dash (-):
- * The first hash is a SHA1 (only first 5 bytes) based on the `TextureHashGenerationStrategy` used. If `FromImageName` is specified, then it is based on the UTF8 (without BOM) representation.
- * The second hash is a SHA1 (only first 5 bytes) based on the data in the image. This is used to determine whether or not the image has been modified, so images that has not been edited are not loaded. Unless `LoadUnmodifiedTextures` is specified.
-
-If `TextureHashGenerationStrategy=FromImageData` is specified, only a single hash will appear in each file name, as that single hash can be used both to identify the image and to determine whether or not it has been edited.
-
-## Integrating with Auto Translator
-*NOTE: Everything below this point requires programming knowledge!*
-
-### Implementing a plugin that can query translations
-As a mod author, you may want to query translations from the plugin. This easily done, take a look at the example below.
-
-```C#
-public class MyPlugin : XPluginBase
-{
-   public void Start()
-   {
-      var untranslatedText = "お前はもう死んでいる！";
-
-      // EXAMPLE 1) Query cache, and if it cannot be found in cache query the user-selected translation endpoint
-      AutoTranslator.Default.TranslateAsync( untranslatedText, result =>
-      {
-         if( result.Succeeded )
-         {
-            var translatedText = result.TranslatedText;
-         }
-         else
-         {
-            var errorMessage = result.ErrorMessage;
-         }
-      } );
-
-      // EXAMPLE 2) Query cache only
-      if( AutoTranslator.Default.TryTranslate( untranslatedText, out string translation ) )
-      {
-         // success
-      }
-      else
-      {
-         // failure
-      }
-   }
-}
-```
-
-This requires version 3.7.0 or later!
-
-### Implementing a component that the Auto Translator should not interfere with
-As a mod author, you might not want the Auto Translator to interfere with your mods UI. If this is the case there's two ways to tell Auto Translator not to perform any translation:
- * If your UI is based on GameObjects, you can simply name your GameObjects containing the text element (for example Text class) to something that contains the string "XUAIGNORE". The Auto Translator will check for this and ignore components that contains the string.
- * If your UI is based on IMGUI, the above approach is not possible, because there are no GameObject. In that case you can do the following instead:
-
-```C#
-public class MyPlugin : XPluginBase
-{
-   private GameObject _xua;
-   private bool _lookedForXua;
-
-   public void OnGUI()
-   {
-      // make sure we only do this lookup once, as it otherwise may be detrimental to performance!
-      // also: do not attempt to do this in the Awake method or similar of your plugin, as your plugin may be instantiated before the auto translator!
-      if(!_lookedForXua)
-      {
-         _lookedForXua = true;
-         _xua = GameObject.Find( "___XUnityAutoTranslator" );
-      }
-
-      // try-finally block is important to make sure you re-enable the plugin
-      try
-      {
-         _xua?.SendMessage("DisableAutoTranslator");
-
-         // do your GUI things here
-         GUILayout.Button( "こんにちは！" );
-      }
-      finally
-      {
-         _xua?.SendMessage("EnableAutoTranslator");
-      }
-   }
-}
-```
-
-This requires version 2.15.0 or later!
-
-## Implementing a Translator
-Since version 3.0.0, you can now also implement your own translators.
-
-In order to do so, all you have to do is implement the following interface, build the assembly and place the generated DLL in the `Translators` folder.
-
-```C#
-/// <summary>
-/// The interface that must be implemented by a translator.
-/// </summary>
-public interface ITranslateEndpoint
-{
-   /// <summary>
-   /// Gets the id of the ITranslateEndpoint that is used as a configuration parameter.
-   /// </summary>
-   string Id { get; }
-
-   /// <summary>
-   /// Gets a friendly name that can be displayed to the user representing the plugin.
-   /// </summary>
-   string FriendlyName { get; }
-
-   /// <summary>
-   /// Gets the maximum concurrency for the endpoint. This specifies how many times "Translate"
-   /// can be called before it returns.
-   /// </summary>
-   int MaxConcurrency { get; }
-
-   /// <summary>
-   /// Gets the maximum number of translations that can be served per translation request.
-   /// </summary>
-   int MaxTranslationsPerRequest { get; }
-
-   /// <summary>
-   /// Called during initialization. Use this to initialize plugin or throw exception if impossible.
-   /// </summary>
-   void Initialize( IInitializationContext context );
-
-   /// <summary>
-   /// Attempt to translated the provided untranslated text. Will be used in a "coroutine",
-   /// so it can be implemented in an asynchronous fashion.
-   /// </summary>
-   IEnumerator Translate( ITranslationContext context );
-}
-```
-
-Often an implementation of this interface will access an external web service. If this is the case, you do not need to implement the entire interface yourself. Instead you can rely on a base class in the `XUnity.AutoTranslator.Plugin.Core` assembly. But more on this later.
-
-### Important Notes on Implementing a Translator based on an Online Service
-Whenever you implement a translator based on an online service, it is important to not use it in an abusive way. For example by:
- * Establishing a large number of connections to it
- * Performing web scraping instead of using an available API
- * Making concurrent requests towards it
- * *This is especially important if the service is not authenticated*
-
-With that in mind, consider the following:
- * The `WWW` class in Unity establishes a new TCP connection on each request you make, making it extremely poor at this kind of job. Especially if SSL (https) is involved because it has to do the entire handshake procedure each time. Yuck.
- * The `UnityWebRequest` class in Unity does not exist in most games, because the authors use an old engine, so it is not a good choice either.
- * The `WebClient` class from .NET is capable of using persistent connections (it does so by default), but has its own problems with SSL. The version of Mono used in most Unity games rejects all certificates by default making all HTTPS connections fail. This, however, can be remedied during the initialization phase of the translator (see examples below). Another shortcoming of this API is the fact that the runtime will never release the TCP connections it has used until the process ends. The API also integrates terribly with Unity because callbacks return on a background thread.
- * The `WebRequest` class from .NET is essentially the same as WebClient.
- * The `HttpClient` class from .NET is also unlikely to exist in most Unity games.
-
-None of these are therefore an ideal solution.
-
-To remedy this, the plugin implements a class `XUnityWebClient`, which is based on Mono's version of WebClient. However, it adds the following features:
- * Enables integration with Unity by returning result classes that can be 'yielded'.
- * Properly closes connections that has not been used for 50 seconds.
-
-I recommend using this class, or in case that cannot be used, falling back to the .NET 'WebClient'.
-
-### How-To
-Follow these steps:
- 1. Download XUnity.AutoTranslator-Developer-{VERSION}.zip from [releases](../../releases)
- 2. Start a new project (.NET 3.5) in Visual Studio 2017 or later. I recommend using the same name for your assembly/project as the "Id" you are going to use in your interface implementation. This makes it easier for users to know how to configure your translator
-    * I recommend using the "Class Library (.NET Standard)" and simply editing the generated .csproj file to use 'net35' instead of 'netstandard2.0'. This generates much cleaner .csproj files.
- 3. Add a reference to the XUnity.AutoTranslator.Plugin.Core.dll that you downloaded in step 1
- 4. You do not need to directly reference the UnityEngine.dll assembly. This is good, because you do not need to worry about which version of Unity is used.
-    * If you do need a reference to this assembly (because you need functionality from it) consider using an old version of it (if `UnityEngine.CoreModule.dll` exists in the Managed folder, it is not an old version!)
- 5. Create a new class that either:
-    * Implements the `ITranslateEndpoint` interface
-    * Inherits from the `HttpEndpoint` class
-    * Inherits from the `WwwEndpoint` class
-    * Inherits from the `ExtProtocolEndpoint` class
-
-Here's an example that simply reverses the text and also reads some configuration from the configuration file the plugin uses:
-
-```C#
-public class ReverseTranslatorEndpoint : ITranslateEndpoint
-{
-   private bool _myConfig;
-
-   public string Id => "ReverseTranslator";
-
-   public string FriendlyName => "Reverser";
-
-   public int MaxConcurrency => 50;
-
-   public int MaxTranslationsPerRequest => 1;
-
-   public void Initialize( IInitializationContext context )
-   {
-      _myConfig = context.GetOrCreateSetting( "Reverser", "MyConfig", true );
-   }
-
-   public IEnumerator Translate( ITranslationContext context )
-   {
-      var reversedText = new string( context.UntranslatedText.Reverse().ToArray() );
-      context.Complete( reversedText );
-
-      return null;
-   }
-}
-```
-
-Arguably, this is not a particularly interesting example, but it illustrates the basic principles of what must be done in order to implement a Translator.
-
-Let's take a look at a more advanced example that accesses the web:
-
-```C#
-internal class YandexTranslateEndpoint : HttpEndpoint
-{
-   private static readonly HashSet<string> SupportedLanguages = new HashSet<string> { "az", "sq", "am", "en", "ar", "hy", "af", "eu", "ba", "be", "bn", "my", "bg", "bs", "cy", "hu", "vi", "ht", "gl", "nl", "mrj", "el", "ka", "gu", "da", "he", "yi", "id", "ga", "it", "is", "es", "kk", "kn", "ca", "ky", "zh", "ko", "xh", "km", "lo", "la", "lv", "lt", "lb", "mg", "ms", "ml", "mt", "mk", "mi", "mr", "mhr", "mn", "de", "ne", "no", "pa", "pap", "fa", "pl", "pt", "ro", "ru", "ceb", "sr", "si", "sk", "sl", "sw", "su", "tg", "th", "tl", "ta", "tt", "te", "tr", "udm", "uz", "uk", "ur", "fi", "fr", "hi", "hr", "cs", "sv", "gd", "et", "eo", "jv", "ja" };
-   private static readonly string HttpsServicePointTemplateUrl = "https://translate.yandex.net/api/v1.5/tr.json/translate?key={3}&text={2}&lang={0}-{1}&format=plain";
-
-   private string _key;
-
-   public override string Id => "YandexTranslate";
-
-   public override string FriendlyName => "Yandex Translate";
-
-   public override void Initialize( IInitializationContext context )
-   {
-      _key = context.GetOrCreateSetting( "Yandex", "YandexAPIKey", "" );
-      context.DisableCertificateChecksFor( "translate.yandex.net" );
-
-      // if the plugin cannot be enabled, simply throw so the user cannot select the plugin
-      if( string.IsNullOrEmpty( _key ) ) throw new Exception( "The YandexTranslate endpoint requires an API key which has not been provided." );
-      if( !SupportedLanguages.Contains( context.SourceLanguage ) ) throw new Exception( $"The source language '{context.SourceLanguage}' is not supported." );
-      if( !SupportedLanguages.Contains( context.DestinationLanguage ) ) throw new Exception( $"The destination language '{context.DestinationLanguage}' is not supported." );
-   }
-
-   public override void OnCreateRequest( IHttpRequestCreationContext context )
-   {
-      var request = new XUnityWebRequest(
-         string.Format(
-            HttpsServicePointTemplateUrl,
-            context.SourceLanguage,
-            context.DestinationLanguage,
-            WwwHelper.EscapeUrl( context.UntranslatedText ),
-            _key ) );
-         
-      request.Headers[ HttpRequestHeader.Accept ] = "*/*";
-      request.Headers[ HttpRequestHeader.AcceptCharset ] = "UTF-8";
-
-      context.Complete( request );
-   }
-
-   public override void OnExtractTranslation( IHttpTranslationExtractionContext context )
-   {
-      var data = context.Response.Data;
-      var obj = JSON.Parse( data );
-
-      var code = obj.AsObject[ "code" ].ToString();
-      if( code != "200" ) context.Fail( "Received bad response code: " + code );
-
-      var token = obj.AsObject[ "text" ].ToString();
-      var translation = JsonHelper.Unescape( token.Substring( 2, token.Length - 4 ) );
-
-      if( string.IsNullOrEmpty( translation ) ) context.Fail( "Received no translation." );
-
-      context.Complete( translation );
-   }
-}
-```
-
-This plugin extends from `HttpEndpoint`. Let's look at the three methods it overrides:
- * `Initialize` is used to read the API key the user has configured. In addition it calls `context.DisableCertificateChecksFor( "translate.yandex.net" )` in order to disable the certificate check for this specific hostname. If this is neglected, SSL will fail in most versions of Unity. Finally, it throws an exception if the plugin cannot be used with the specified configuration.
- * `OnCreateRequest` is used to construct the `XUnityWebRequest` object that will be sent to the external endpoint. The call to `context.Complete( request )` specifies the request to use.
- * `OnExtractTranslation` is used to extract the text from the response returned from the web server.
-
-As you can see, the `XUnityWebClient` class is not even used. We simply specify a request object that the `HttpEndpoint` will use internally to perform the request.
-
-After implementing the class, simply build the project and place the generated DLL file in the "Translators" directory of the plugin folder. That's it.
-
-For more examples of implementations, you can simply take a look at this projects source code.
-
-**NOTE**: If you implement a class based on the `HttpEndpoint` and you get an error where the web request is never completed, then it is likely due to the web server requiring Tls1.2. Unity-mono has issues with this spec and it will cause the request to lock up forever. The only solutions to this for now are:
- * Disable SSL, if you can. There are many situations where it is simply not possible to do this because the web server will simply redirect back to the HTTPS endoint.
- * Use the `WwwEndpoint` instead. I highly advice against this though, unless it is an authenticated endpoint.
-
-Another way to implement a translator is to implement the `ExtProtocolEndpoint` class. This can be used to delegate the actual translation logic to an external process. Currently there is no documentation on this, but you can take a look at the LEC implementation, which uses it.
-
-If instead, you use the interface directly, it is also possible to extend from MonoBehaviour to get access to all the normal lifecycle callbacks of Unity components.
-
-## Implementing a Resource Redirector
-The resource director allows you to modify resources loaded through the `Resources` and `AssetBundle` API as they are being loaded by the game.
-
-The following API surface is made available by the Resource Redirector:
-
-```C#
-/// <summary>
-/// Entrypoint to the resource redirection API.
-/// </summary>
-public static class ResourceRedirection
-{
-    /// <summary>
-    /// Gets or sets a bool indicating if the resource redirector
-    /// should log all loaded resources/assets to the console.
-    /// </summary>
-    public static bool LogAllLoadedResources { get; set; }
-
-    /// <summary>
-    /// Register an AssetLoading hook (prefix to loading an asset from an asset bundle).
-    /// </summary>
-    /// <param name="priority">The priority of the callback, the higher the sooner it will be called.</param>
-    /// <param name="action">The callback.</param>
-    public static void RegisterAssetLoadingHook( int priority, Action<AssetLoadingContext> action );
-
-    /// <summary>
-    /// Unregister an AssetLoading hook (prefix to loading an asset from an asset bundle).
-    /// </summary>
-    /// <param name="action">The callback.</param>
-    public static void UnregisterAssetLoadingHook( Action<AssetLoadingContext> action );
-
-    /// <summary>
-    /// Register an AsyncAssetLoading hook (prefix to loading an asset from an asset bundle asynchronously).
-    /// </summary>
-    /// <param name="priority">The priority of the callback, the higher the sooner it will be called.</param>
-    /// <param name="action">The callback.</param>
-    public static void RegisterAsyncAssetLoadingHook( int priority, Action<AsyncAssetLoadingContext> action );
-
-    /// <summary>
-    /// Unregister an AsyncAssetLoading hook (prefix to loading an asset from an asset bundle asynchronously).
-    /// </summary>
-    /// <param name="action">The callback.</param>
-    public static void UnregisterAsyncAssetLoadingHook( Action<AsyncAssetLoadingContext> action );
-
-    /// <summary>
-    /// Register an AsyncAssetLoading hook and AssetLoading hook (prefix to loading an asset from an asset bundle synchronously/asynchronously).
-    /// </summary>
-    /// <param name="priority">The priority of the callback, the higher the sooner it will be called.</param>
-    /// <param name="action">The callback.</param>
-    public static void RegisterAsyncAndSyncAssetLoadingHook( int priority, Action<IAssetLoadingContext> action );
-
-    /// <summary>
-    /// Unregister an AsyncAssetLoading hook and AssetLoading hook (prefix to loading an asset from an asset bundle synchronously/asynchronously).
-    /// </summary>
-    /// <param name="action">The callback.</param>
-    public static void UnregisterAsyncAndSyncAssetLoadingHook( Action<IAssetLoadingContext> action );
-
-    /// <summary>
-    /// Register an AssetLoaded hook (postfix to loading an asset from an asset bundle (both synchronous and asynchronous)).
-    /// </summary>
-    /// <param name="behaviour">The behaviour of the callback.</param>
-    /// <param name="priority">The priority of the callback, the higher the sooner it will be called.</param>
-    /// <param name="action">The callback.</param>
-    public static void RegisterAssetLoadedHook( HookBehaviour behaviour, int priority, Action<AssetLoadedContext> action );
-
-    /// <summary>
-    /// Unregister an AssetLoaded hook (postfix to loading an asset from an asset bundle (both synchronous and asynchronous)).
-    /// </summary>
-    /// <param name="action">The callback.</param>
-    public static void UnregisterAssetLoadedHook( Action<AssetLoadedContext> action );
-
-    /// <summary>
-    /// Register an AssetBundleLoading hook (prefix to loading an asset bundle synchronously).
-    /// </summary>
-    /// <param name="priority">The priority of the callback, the higher the sooner it will be called.</param>
-    /// <param name="action">The callback.</param>
-    public static void RegisterAssetBundleLoadingHook( int priority, Action<AssetBundleLoadingContext> action );
-
-    /// <summary>
-    /// Unregister an AssetBundleLoading hook (prefix to loading an asset bundle synchronously).
-    /// </summary>
-    /// <param name="action">The callback.</param>
-    public static void UnregisterAssetBundleLoadingHook( Action<AssetBundleLoadingContext> action );
-
-    /// <summary>
-    /// Register an AsyncAssetBundleLoading hook (prefix to loading an asset bundle asynchronously).
-    /// </summary>
-    /// <param name="priority">The priority of the callback, the higher the sooner it will be called.</param>
-    /// <param name="action">The callback.</param>
-    public static void RegisterAsyncAssetBundleLoadingHook( int priority, Action<AsyncAssetBundleLoadingContext> action );
-
-    /// <summary>
-    /// Unregister an AsyncAssetBundleLoading hook (prefix to loading an asset bundle asynchronously).
-    /// </summary>
-    /// <param name="action">The callback.</param>
-    public static void UnregisterAsyncAssetBundleLoadingHook( Action<AsyncAssetBundleLoadingContext> action );
-
-    /// <summary>
-    /// Register an AsyncAssetBundleLoading hook and AssetBundleLoading hook (prefix to loading an asset bundle synchronously/asynchronously).
-    /// </summary>
-    /// <param name="priority">The priority of the callback, the higher the sooner it will be called.</param>
-    /// <param name="action">The callback.</param>
-    public static void RegisterAsyncAndSyncAssetBundleLoadingHook( int priority, Action<IAssetBundleLoadingContext> action );
-
-    /// <summary>
-    /// Unregister an AsyncAssetBundleLoading hook and AssetBundleLoading hook (prefix to loading an asset bundle synchronously/asynchronously).
-    /// </summary>
-    /// <param name="action">The callback.</param>
-    public static void UnregisterAsyncAndSyncAssetBundleLoadingHook( Action<IAssetBundleLoadingContext> action );
-
-    /// <summary>
-    /// Register a ReourceLoaded hook (postfix to loading a resource from the Resources API (both synchronous and asynchronous)).
-    /// </summary>
-    /// <param name="behaviour">The behaviour of the callback.</param>
-    /// <param name="priority">The priority of the callback, the higher the sooner it will be called.</param>
-    /// <param name="action">The callback.</param>
-    public static void RegisterResourceLoadedHook( HookBehaviour behaviour, int priority, Action<ResourceLoadedContext> action );
-
-    /// <summary>
-    /// Unregister a ReourceLoaded hook (postfix to loading a resource from the Resources API (both synchronous and asynchronous)).
-    /// </summary>
-    /// <param name="action">The callback.</param>
-    public static void UnregisterResourceLoadedHook( Action<ResourceLoadedContext> action );
-
-    /// <summary>
-    /// Enables experimental hooks that allows returning an Asset instead of a Request from async prefix
-    /// asset load operations.
-    /// </summary>
-    public static void EnableSyncOverAsyncAssetLoads();
-
-    /// <summary>
-    /// Disables all recursive behaviour in the plugin. This means that trying to load an asset
-    /// using the hooked APIs will not trigger a callback back into the callback chain. This makes
-    /// setting the correct priorities on callbacks much more important.
-    ///
-    /// This method should not be called lightly. It should not be something a single plugin randomly
-    /// decides to call, but rather decision for how to use the ResourceRedirection API on a game-wide basis.
-    /// </summary>
-    public static void DisableRecursionPermanently();
-
-    /// <summary>
-    /// Creates an asset bundle hook that attempts to load asset bundles in the emulation directory
-    /// over the default asset bundles if they exist.
-    /// </summary>
-    /// <param name="hookPriority">Priority of the hook.</param>
-    /// <param name="emulationDirectory">The directory to look for the asset bundles in.</param>
-    public static void EnableEmulateAssetBundles( int hookPriority, string emulationDirectory );
-
-    /// <summary>
-    /// Disable a previously enabled asset bundle emulation.
-    /// </summary>
-    public static void DisableEmulateAssetBundles();
-
-    /// <summary>
-    /// Creates an asset bundle hook that redirects asset bundles loads to an empty
-    /// asset bundle if the file that is being loaded does not exist.
-    /// </summary>
-    /// <param name="hookPriority">Priority of the hook.</param>
-    public static void EnableRedirectMissingAssetBundlesToEmptyAssetBundle( int hookPriority );
-
-    /// <summary>
-    /// Disable a previously enabled redirect missing asset bundles to empty asset bundle.
-    /// </summary>
-    public static void DisableRedirectMissingAssetBundlesToEmptyAssetBundle();
-}
-
-```
-
-Let's attach some comments to this API.
-
-### Asset Loading/Loaded Methods
-The resource redirector comes with both postfix and prefix callbacks when loading an asset from the `AssetBundle` API.
-
-The event callback chain looks like this `[AssetLoading / AsyncAssetLoading hooks] => [Original Method] => [AssetLoaded hooks]`. The `AssetLoaded` event handles postfixes for both synchronous and asynchronous loading of assets.
-
-#### Asset Loading Methods
-The methods `RegisterAssetLoadingHook( HookBehaviour behaviour, Action<AssetLoadingContext> action )` and `RegisterAsyncAssetLoadingHook( int priority, Action<AsyncAssetLoadingContext> action )` hooks into the `AssetBundle` API when loading assets.
-
-These methods registers prefix callbacks, which means the assets themselves wont be loaded yet when they are called.
-
-The callbacks take the types `AssetLoadingContext` and `AsyncAssetLoadingContext` as an argument, respectively. Let's take a look at their definitions:
-
-```C#
-/// <summary>
-/// The operation context surrounding the AssetLoading hook (synchronous).
-/// </summary>
-public class AssetLoadingContext : IAssetLoadingContext
-{
-    /// <summary>
-    /// Gets the original path the asset bundle was loaded with.
-    /// </summary>
-    /// <returns>The unmodified, original path the asset bundle was loaded with.</returns>
-    public string GetAssetBundlePath();
-
-    /// <summary>
-    /// Gets the normalized path to the asset bundle that is:
-    ///  * Relative to the current directory
-    ///  * Lower-casing
-    ///  * Uses '\' as separators.
-    /// </summary>
-    /// <returns></returns>
-    public string GetNormalizedAssetBundlePath();
-
-    /// <summary>
-    /// Indicate your work is done and if any other hooks to this asset/resource load should be called.
-    /// </summary>
-    /// <param name="skipRemainingPrefixes">Indicate if the remaining prefixes should be skipped.</param>
-    /// <param name="skipOriginalCall">Indicate if the original call should be skipped. If you set the asset, you likely want to set this to true.</param>
-    /// <param name="skipAllPostfixes">Indicate if the postfixes should be skipped.</param>
-    public void Complete( bool skipRemainingPrefixes = true, bool? skipOriginalCall = true, bool? skipAllPostfixes = true );
-
-    /// <summary>
-    /// Disables recursive calls if you make an asset/asset bundle load call
-    /// from within your callback. If you want to prevent recursion this should
-    /// be called before you load the asset/asset bundle.
-    /// </summary>
-    public void DisableRecursion();
-
-    /// <summary>
-    /// Gets the original parameters the asset load call was called with.
-    /// </summary>
-    public AssetLoadingParameters Parameters { get; }
-
-    /// <summary>
-    /// Gets the AssetBundle associated with the loaded assets.
-    /// </summary>
-    public AssetBundle Bundle { get; }
-
-    /// <summary>
-    /// Gets or sets the loaded assets.
-    ///
-    /// Consider using this if the load type is 'LoadByType' or 'LoadNamedWithSubAssets'.
-    /// </summary>
-    public UnityEngine.Object[] Assets { get; set; }
-
-    /// <summary>
-    /// Gets or sets the loaded assets. This is simply equal to the first index of the Assets property, with some
-    /// additional null guards to prevent NullReferenceExceptions when using it.
-    /// </summary>
-    public UnityEngine.Object Asset { get; set; }
-}
-
-/// <summary>
-/// The operation context surrounding the AsyncAssetLoading hook (asynchronous).
-/// </summary>
-public class AsyncAssetLoadingContext : IAssetLoadingContext
-{
-    /// <summary>
-    /// Gets the original path the asset bundle was loaded with.
-    /// </summary>
-    /// <returns>The unmodified, original path the asset bundle was loaded with.</returns>
-    public string GetAssetBundlePath();
-
-    /// <summary>
-    /// Gets the normalized path to the asset bundle that is:
-    ///  * Relative to the current directory
-    ///  * Lower-casing
-    ///  * Uses '\' as separators.
-    /// </summary>
-    /// <returns></returns>
-    public string GetNormalizedAssetBundlePath();
-
-    /// <summary>
-    /// Indicate your work is done and if any other hooks to this asset/resource load should be called.
-    /// </summary>
-    /// <param name="skipRemainingPrefixes">Indicate if the remaining prefixes should be skipped.</param>
-    /// <param name="skipOriginalCall">Indicate if the original call should be skipped. If you set the asset, you likely want to set this to true.</param>
-    /// <param name="skipAllPostfixes">Indicate if the postfixes should be skipped.</param>
-    public void Complete( bool skipRemainingPrefixes = true, bool? skipOriginalCall = true, bool? skipAllPostfixes = true );
-
-    /// <summary>
-    /// Disables recursive calls if you make an asset/asset bundle load call
-    /// from within your callback. If you want to prevent recursion this should
-    /// be called before you load the asset/asset bundle.
-    /// </summary>
-    public void DisableRecursion();
-
-    /// <summary>
-    /// Gets the original parameters the asset load call was called with.
-    /// </summary>
-    public AssetLoadingParameters Parameters { get; }
-
-    /// <summary>
-    /// Gets the AssetBundle associated with the loaded assets.
-    /// </summary>
-    public AssetBundle Bundle { get; }
-
-    /// <summary>
-    /// Gets or sets the AssetBundleRequest used to load assets.
-    /// </summary>
-    public AssetBundleRequest Request { get; set; }
-
-    /// <summary>
-    /// Gets or sets the loaded assets.
-    ///
-    /// Consider using this if the load type is 'LoadByType' or 'LoadNamedWithSubAssets'.
-    /// </summary>
-    UnityEngine.Object[] Assets { get; set; }
-
-    /// <summary>
-    /// Gets or sets the loaded assets. This is simply equal to the first index of the Assets property, with some
-    /// additional null guards to prevent NullReferenceExceptions when using it.
-    /// </summary>
-    UnityEngine.Object Asset { get; set; }
-
-    /// <summary>
-    /// Gets or sets how this load operation should be resolved.
-    /// Setting the Asset/Assets/Request property will automatically update this value.
-    /// </summary>
-    public AsyncAssetLoadingResolve ResolveType { get; set; }
-}
-```
-
-The only difference between these two contexts is that one has an `Asset/Assets` property you can set, while the other has a `Request` property you can set.
-
-Now if you actually paid attention to what you were reading(!?), you would notice that both of the above context objects has an `Asset/Assets` property that can be set.
-
-Under normal circumstances, however, you cannot use the `Assets/Asset` property on the the `AsyncAssetLoadingContext`. In order to be able to use these, you must first call `ResourceRedirection.EnableSyncOverAsyncAssetLoads` once during your initialization logic. This will allow you to set the asset directly so you don't have to go through the standard `AssetBundle` API to obtain a request object.
-
-It is, however, recommended that if you can that you set the `Request` property instead of the `Assets/Asset` property as that will keep the operation asynchronous and not block the game while the asset is being loaded.
-
-If you can handle the loading of the asset remember to call the `Complete` method to indicate your intentions regarding:
- * Whether the rest of the prefixes registered should be skipped.
- * Whether the original method should be skipped.
- * Whether all the postfixes should be skipped.
-
-An important points to make here, is that there is both an `Asset` and an `Assets` property on the context object. These can be used interchangably, but an array will only ever be used if the following condition apply:
- * The `LoadType` in the `Parameters` property is `LoadByType` or `LoadNamedWithSubAssets`, which are the only types of resource loading that may return multiple resources.
-
-Finally, if we take a look at the `Parameters` property of the context object, we will find the following definition:
-
-```C#
-/// <summary>
-/// Class representing the original parameters of the load call.
-/// </summary>
-public class AssetLoadingParameters
-{
-    /// <summary>
-    /// Gets or sets the name of the asset being loaded. Will be null if loaded through 'LoadMainAsset' or 'LoadByType'.
-    /// </summary>
-    public string Name { get; set; }
-
-    /// <summary>
-    /// Gets or sets the type that passed to the asset load call.
-    /// </summary>
-    public Type Type { get; set; }
-
-    /// <summary>
-    /// Gets the type of call that loaded this asset. If 'LoadByType' or 'LoadNamedWithSubAssets' is specified
-    /// multiple assets may be returned if subscribed as 'OneCallbackPerLoadCall'.
-    /// </summary>
-    public AssetLoadType LoadType { get; }
-}
-
-/// <summary>
-/// Enum representing the different ways an asset may be loaded.
-/// </summary>
-public enum AssetLoadType
-{
-    /// <summary>
-    /// Indicates that this asset has been loaded as the 'mainAsset' in the AssetBundle API.
-    /// </summary>
-    LoadMainAsset,
-
-    /// <summary>
-    /// Indicates that this call is loading all assets of a specific type in an AssetBundle API.
-    /// </summary>
-    LoadByType,
-
-    /// <summary>
-    /// Indicates that this call is loading a specific named asset in the AssetBundle API.
-    /// </summary>
-    LoadNamed,
-
-    /// <summary>
-    /// Indicates that this call is loading a specific named asset and all those below it in the AssetBundle API.
-    /// </summary>
-    LoadNamedWithSubAssets
-}
-```
-
-Another way to change the result of the asset load operation is to change the value of the `Name` and `Type` properties in the `Parameters` property. If you do this, you likely will not want to call the Complete method, as you will want the original method to still be called.
-
-An important additional way to subscribe to the prefix asset loading operations are through the method `RegisterAsyncAndSyncAssetLoadingHook( int priority, Action<IAssetLoadingContext> action )`. This method will handle both async and sync asset loading operations. The `IAssetLoadingContext` is an interface implemented by both the `AssetLoadingContext` and `AsyncAssetLoadingContext`.
-
-Do note, that if you want to use this method you must first call the method `EnableSyncOverAsyncAssetLoads()` to enable the hooks required for this to work.
-
-#### Asset Loaded Methods
-The method `RegisterAssetLoadedHook( HookBehaviour behaviour, Action<AssetLoadedContext> action )` hooks into the `AssetBundle` API in the UnityEngine. Any time an asset is loaded through this API a callback is sent to these hooks.
-
-This API is a postfix hook to the `AssetBundle` API, which means that it is first called once the original asset has already been loaded, but is still replacable.
-
-The `AssetLoadedContext` class has the following definition:
-
-```C#
-/// <summary>
-/// The operation context surrounding the AssetLoaded hook.
-/// </summary>
-public class AssetLoadedContext : IAssetOrResourceLoadedContext
-{
-    /// <summary>
-    /// Gets a bool indicating if this resource has already been redirected before.
-    /// </summary>
-    public bool HasReferenceBeenRedirectedBefore( UnityEngine.Object asset );
-
-    /// <summary>
-    /// Gets a file system path for the specfic asset that should be unique.
-    /// </summary>
-    /// <param name="asset"></param>
-    /// <returns></returns>
-    public string GetUniqueFileSystemAssetPath( UnityEngine.Object asset );
-
-    /// <summary>
-    /// Gets the original path the asset bundle was loaded with.
-    /// </summary>
-    /// <returns>The unmodified, original path the asset bundle was loaded with.</returns>
-    public string GetAssetBundlePath();
-
-    /// <summary>
-    /// Gets the normalized path to the asset bundle that is:
-    ///  * Relative to the current directory
-    ///  * Lower-casing
-    ///  * Uses '\' as separators.
-    /// </summary>
-    /// <returns></returns>
-    public string GetNormalizedAssetBundlePath();
-
-    /// <summary>
-    /// Indicate your work is done and if any other hooks to this asset/resource load should be called.
-    /// </summary>
-    /// <param name="skipRemainingPostfixes">Indicate if any other hooks should be skipped.</param>
-    public void Complete( bool skipRemainingPostfixes = true );
-
-    /// <summary>
-    /// Disables recursive calls if you make an asset/asset bundle load call
-    /// from within your callback. If you want to prevent recursion this should
-    /// be called before you load the asset/asset bundle.
-    /// </summary>
-    public void DisableRecursion();
-
-    /// <summary>
-    /// Gets the original parameters the asset load call was called with.
-    /// </summary>
-    public AssetLoadedParameters Parameters { get; }
-
-    /// <summary>
-    /// Gets the AssetBundle associated with the loaded assets.
-    /// </summary>
-    public AssetBundle Bundle { get; }
-
-    /// <summary>
-    /// Gets the loaded assets. Override individual indices to change the asset reference that will be loaded.
-    ///
-    /// Consider using this if the load type is 'LoadByType' or 'LoadNamedWithSubAssets' and you subscribed with 'OneCallbackPerLoadCall'.
-    /// </summary>
-    public UnityEngine.Object[] Assets { get; set; }
-
-    /// <summary>
-    /// Gets the loaded asset. This is simply equal to the first index of the Assets property, with some
-    /// additional null guards to prevent NullReferenceExceptions when using it.
-    /// </summary>
-    public UnityEngine.Object Asset { get; set; }
-}
-```
-
-The HookBehaviour is an enum with the following definition:
-
-```C#
-/// <summary>
-/// Enum indicating how the resource redirector should treat the callback.
-/// </summary>
-public enum HookBehaviour
-{
-    /// <summary>
-    /// Specifies that exactly one callback should be received per call to asset/resource load method.
-    /// </summary>
-    OneCallbackPerLoadCall = 1,
-
-    /// <summary>
-    /// Specifies that exactly one callback should be received per loaded asset/resources. This means
-    /// that the 'Asset' property should be used over the 'Assets' property on the context object.
-    /// Do note that when using this option, if no resources are returned by a load call, no callbacks
-    /// will be received.
-    /// </summary>
-    OneCallbackPerResourceLoaded = 2
-}
-```
-
-An important points to make here, is that there is both an `Asset` and an `Assets` property on the context object. These can be used interchangably, but an array will only ever be used if the following two conditions apply:
- * You've subscribed with `OneCallbackPerLoadCall`.
- * The `LoadType` in the `Parameters` property is `LoadByType` or `LoadNamedWithSubAssets`, which are the only types of resource loading that may return multiple resources.
-
-In relation to this, it is worth mentioning that if a call to load assets returns 0 assets, you will not receive any callbacks if you subscribe through `OneCallbackPerResourceLoaded` where as if you subscribe through `OneCallbackPerLoadCall` you would still get your one callback.
-
-If you update or replace the asset being loaded remember to call to `Complete` method to indicate your intentions regarding:
- * Whether the remaining postfixes should be called.
-
-In addition, if we take a look at the `Parameters` property of the context object, we will find the following definition:
-
-```C#
-/// <summary>
-/// Class representing the original parameters of the load call.
-/// </summary>
-public class AssetLoadedParameters
-{
-    /// <summary>
-    /// Gets the name of the asset being loaded. Will be null if loaded through 'LoadMainAsset' or 'LoadByType'.
-    /// </summary>
-    public string Name { get; }
-
-    /// <summary>
-    /// Gets the type that passed to the asset load call.
-    /// </summary>
-    public Type Type { get; }
-
-    /// <summary>
-    /// Gets the type of call that loaded this asset. If 'LoadByType' or 'LoadNamedWithSubAssets' is specified
-    /// multiple assets may be returned if subscribed as 'OneCallbackPerLoadCall'.
-    /// </summary>
-    public AssetLoadType LoadType { get; }
-}
-
-/// <summary>
-/// Enum representing the different ways an asset may be loaded.
-/// </summary>
-public enum AssetLoadType
-{
-    /// <summary>
-    /// Indicates that this asset has been loaded as the 'mainAsset' in the AssetBundle API.
-    /// </summary>
-    LoadMainAsset,
-
-    /// <summary>
-    /// Indicates that this call is loading all assets of a specific type in an AssetBundle API.
-    /// </summary>
-    LoadByType,
-
-    /// <summary>
-    /// Indicates that this call is loading a specific named asset in the AssetBundle API.
-    /// </summary>
-    LoadNamed,
-
-    /// <summary>
-    /// Indicates that this call is loading a specific named asset and all those below it in the AssetBundle API.
-    /// </summary>
-    LoadNamedWithSubAssets
-}
-```
-
-It is also worth mentioning that these hooks handles both synchronous and asynchronous loading of assets.
-
-Hooks subscribed through hook behaviour `OneCallbackPerLoadCall` will be called before hooks with the behaviour `OneCallbackPerResourceLoaded`.
-
-### Resource Load Methods
-The resource redirector comes only with postfix callbacks when loading an asset from the `Resources` API.
-
-The event callback chain looks like this `[Original Method] => [ResourceLoaded hooks]`. The `ResourceLoaded` event handles postfixes for both synchronous and asynchronous loading of assets.
-
-#### Resource Loaded Methods
-The method `RegisterResourceLoadedHook( HookBehaviour behaviour, Action<ResourceLoadedContext> action )` hooks into the `Resources` API in the UnityEngine. Any time a resource is loaded through this API a callback is sent to these hooks.
-
-This API is a postfix hook to the `Resources` API, which means that it is first called once the original asset has already been loaded, but is still replacable.
-
-The `ResourceLoadedContext` class has the following definition:
-
-```C#
-/// <summary>
-/// The operation context surrounding the ResourceLoaded hook.
-/// </summary>
-public class ResourceLoadedContext : IAssetOrResourceLoadedContext
-{
-    /// <summary>
-    /// Gets a bool indicating if this resource has already been redirected before.
-    /// </summary>
-    public bool HasReferenceBeenRedirectedBefore( UnityEngine.Object asset );
-
-    /// <summary>
-    /// Gets a file system path for the specfic asset that should be unique.
-    /// </summary>
-    /// <param name="asset"></param>
-    /// <returns></returns>
-    public string GetUniqueFileSystemAssetPath( UnityEngine.Object asset );
-
-    /// <summary>
-    /// Indicate your work is done and if any other hooks to this asset/resource load should be called.
-    /// </summary>
-    /// <param name="skipRemainingPostfixes">Indicate if any other hooks should be skipped.</param>
-    public void Complete( bool skipRemainingPostfixes = true );
-
-    /// <summary>
-    /// Disables recursive calls if you make an asset/asset bundle load call
-    /// from within your callback. If you want to prevent recursion this should
-    /// be called before you load the asset/asset bundle.
-    /// </summary>
-    public void DisableRecursion();
-
-    /// <summary>
-    /// Gets the original parameters the asset load call was called with.
-    /// </summary>
-    public ResourceLoadParameters Parameters { get; }
-
-    /// <summary>
-    /// Gets the loaded assets. Override individual indices to change the asset reference that will be loaded.
-    ///
-    /// Consider using this if the load type is 'LoadByType' and you subscribed with 'OneCallbackPerLoadCall'.
-    /// </summary>
-    public UnityEngine.Object[] Assets { get; set; }
-
-    /// <summary>
-    /// Gets the loaded asset. This is simply equal to the first index of the Assets property, with some
-    /// additional null guards to prevent NullReferenceExceptions when using it.
-    /// </summary>
-    public UnityEngine.Object Asset { get; set; }
-}
-```
-
-The HookBehaviour is an enum with the following definition:
-
-```C#
-/// <summary>
-/// Enum indicating how the resource redirector should treat the callback.
-/// </summary>
-public enum HookBehaviour
-{
-    /// <summary>
-    /// Specifies that exactly one callback should be received per call to asset/resource load method.
-    /// </summary>
-    OneCallbackPerLoadCall = 1,
-
-    /// <summary>
-    /// Specifies that exactly one callback should be received per loaded asset/resources. This means
-    /// that the 'Asset' property should be used over the 'Assets' property on the context object.
-    /// Do note that when using this option, if no resources are returned by a load call, no callbacks
-    /// will be received.
-    /// </summary>
-    OneCallbackPerResourceLoaded = 2
-}
-```
-
-An important points to make here, is that there is both an `Asset` and an `Assets` property on the context object. These can be used interchangably, but an array will only ever be used if the following two conditions apply:
- * You've subscribed with `OneCallbackPerLoadCall`.
- * The `LoadType` in the `Parameters` property is `LoadByType`, which is the only type of resource loading that may return multiple resources.
-
-In relation to this, it is worth mentioning that if a call to load assets returns 0 assets, you will not receive any callbacks if you subscribe through `OneCallbackPerResourceLoaded` where as if you subscribe through `OneCallbackPerLoadCall` you would still get your one callback.
-
-If you update or replace the asset being loaded remember to call to `Complete` method to indicate your intentions regarding:
- * Whether the remaining postfixes should be called.
-
-In addition, if we take a look at the `Parameters` property of the context object, we will find the following definition:
-
-```C#
-/// <summary>
-/// Class representing the original parameters of the load call.
-/// </summary>
-public class ResourceLoadedParameters
-{
-    /// <summary>
-    /// Gets the name of the resource being loaded. Will not be the complete resource path if 'LoadByType' is used.
-    /// </summary>
-    public string Path { get; set; }
-
-    /// <summary>
-    /// Gets the type that passed to the resource load call.
-    /// </summary>
-    public Type Type { get; set; }
-
-    /// <summary>
-    /// Gets the type of call that loaded this asset. If 'LoadByType' is specified
-    /// multiple assets may be returned if subscribed as 'OneCallbackPerLoadCall'.
-    /// </summary>
-    public ResourceLoadType LoadType { get; }
-}
-
-/// <summary>
-/// Enum representing the different ways a resource may be loaded.
-/// </summary>
-public enum ResourceLoadType
-{
-    /// <summary>
-    /// Indicates that this call is loading all assets of a specific type (below a specific path) in the Resources API.
-    /// </summary>
-    LoadByType,
-
-    /// <summary>
-    /// Indicates that this call is loading a single named asset in the Resources API.
-    /// </summary>
-    LoadNamed,
-
-    /// <summary>
-    /// Indicates that this call is loading a single named built-in asset in the Resources API.
-    /// </summary>
-    LoadNamedBuiltIn
-}
-```
-
-It is also worth mentioning that these hooks handles both synchronous and asynchronous loading of resources.
-
-Hooks subscribed through hook behaviour `OneCallbackPerLoadCall` will be called before hooks with the behaviour `OneCallbackPerResourceLoaded`.
-
-### AssetBundle Load Methods
-It is also possible to hook the loading of `AssetBundles` themselves. Only prefix hooks are supported when loading an asset bundle.
-
-The event callback chain looks like this `[AssetBundleLoading/AsyncAssetBundleLoading hooks] => [Original Method]`.
-
-#### AssetBundle Synchrous Load Methods
-The method `RegisterAssetBundleLoadingHook( Action<AssetBundleLoadingContext> action )` is used to hook the synchronous AssetBundle load methods.
-
-This API is a prefix to the `AssetBundle` API, which means that it is called before the AssetBundle is loaded.
-
-The `AssetBundleLoadingContext` class has the following definition:
-
-```C#
-/// <summary>
-/// The operation context surrounding the AssetBundleLoading hook (synchronous).
-/// </summary>
-public class AssetBundleLoadingContext : IAssetBundleLoadingContext
-{
-    /// <summary>
-    /// Gets a normalized path to the asset bundle that is:
-    ///  * Relative to the current directory
-    ///  * Lower-casing
-    ///  * Uses '\' as separators.
-    /// </summary>
-    /// <returns></returns>
-    public string GetNormalizedPath();
-
-    /// <summary>
-    /// Indicate your work is done and if any other hooks to this asset bundle load should be called.
-    /// </summary>
-    /// <param name="skipRemainingPrefixes">Indicate if the remaining prefixes should be skipped.</param>
-    /// <param name="skipOriginalCall">Indicate if the original call should be skipped. If you set the asset bundle, you likely want to set this to true.</param>
-    public void Complete( bool skipRemainingPrefixes = true, bool? skipOriginalCall = true );
-
-    /// <summary>
-    /// Disables recursive calls if you make an asset/asset bundle load call
-    /// from within your callback. If you want to prevent recursion this should
-    /// be called before you load the asset/asset bundle.
-    /// </summary>
-    public void DisableRecursion();
-
-    /// <summary>
-    /// Gets the parameters of the call.
-    /// </summary>
-    public AssetBundleLoadingParameters Parameters { get; }
-
-    /// <summary>
-    /// Gets or sets the AssetBundle being loaded.
-    /// </summary>
-    public AssetBundle Bundle { get; set; }
-}
-```
-
-Because this is a prefix API, the `Bundle` property will be null when the method is called and it is up to you to set it to a different value if you can handle the specified path.
-
-If you update the `Bundle` property, remember to call the `Complete` to indicate your intentions regarding:
- * Whether or not the remaining prefixes should be skipped.
- * Whether or not the original method should be skipped.
-
-In addition, if we take a look at the `Parameters` property of the context object, we will find the following definition:
-
-```C#
-/// <summary>
-/// Class representing the original parameters of the load call.
-/// </summary>
-public class AssetBundleLoadingParameters
-{
-    /// <summary>
-    /// Gets or sets the loaded path. Only relevant for 'LoadFromFile'.
-    /// </summary>
-    public string Path { get; }
-
-    /// <summary>
-    /// Gets or sets the crc. Only relevant for 'LoadFromFile'.
-    /// </summary>
-    public uint Crc { get; }
-
-    /// <summary>
-    /// Gets or sets the offset. Only relevant for 'LoadFromFile'.
-    /// </summary>
-    public ulong Offset { get; }
-
-    /// <summary>
-    /// Gets the type of call that is loading this asset bundle.
-    /// </summary>
-    public AssetBundleLoadType LoadType { get; }
-}
-
-/// <summary>
-/// Enum representing the different ways an asset bundle may be loaded.
-/// </summary>
-public enum AssetBundleLoadType
-{
-    /// <summary>
-    /// Indicates that the asset bundle is being loaded through a call to 'LoadFromFile' or 'LoadFromFileAsync'.
-    /// </summary>
-    LoadFromFile,
-}
-```
-
-As can be seen, the current implementation only hooks the LoadFromFile/LoadFromFileAsync ways of loading AssetBundles, but this may be expanded in the future.
-
-It may also be worth looking at the `GetNormalizedPath()` method instead of the `Path` property of the original call parameters. This is because the path passed to the method can take literally any form:
- * Absolute path
- * Relative path
- * Include a stray '..' in the middle of the path
- 
-Another way to change the result of the asset bundle load operation is to change the value of the `Path`, `Crc` and `Offset` properties in the `Parameters` property. If you do this, you likely will not want to call the Complete method, as you will want the original method to still be called.
-
-#### AssetBundle Asynchrounous Load Methods
-The method `RegisterAsyncAssetBundleLoadingHook( Action<AsyncAssetBundleLoadingContext> action )` is used to hook the asynchronous AssetBundle load methods.
-
-This API is a prefix to the `AssetBundle` API, which means that it is called before the `AssetBundleCreateRequest` is created.
-
-The `AsyncAssetBundleLoadingContext` class has the following definition:
-
-```C#
-/// <summary>
-/// The operation context surrounding the AsyncAssetBundleLoading hook (asynchronous).
-/// </summary>
-public class AsyncAssetBundleLoadingContext : IAssetBundleLoadingContext
-{
-    /// <summary>
-    /// Gets a normalized path to the asset bundle that is:
-    ///  * Relative to the current directory
-    ///  * Lower-casing
-    ///  * Uses '\' as separators.
-    /// </summary>
-    /// <returns></returns>
-    public string GetNormalizedPath();
-
-    /// <summary>
-    /// Indicate your work is done and if any other hooks to this asset bundle load should be called.
-    /// </summary>
-    /// <param name="skipRemainingPrefixes">Indicate if the remaining prefixes should be skipped.</param>
-    /// <param name="skipOriginalCall">Indicate if the original call should be skipped. If you set the request, you likely want to set this to true.</param>
-    public void Complete( bool skipRemainingPrefixes = true, bool? skipOriginalCall = true );
-
-    /// <summary>
-    /// Disables recursive calls if you make an asset/asset bundle load call
-    /// from within your callback. If you want to prevent recursion this should
-    /// be called before you load the asset/asset bundle.
-    /// </summary>
-    public void DisableRecursion();
-
-    /// <summary>
-    /// Gets the parameters of the call.
-    /// </summary>
-    public AssetBundleLoadingParameters Parameters { get; }
-
-    /// <summary>
-    /// Gets or sets the AssetBundleCreateRequest being used to load the AssetBundle.
-    /// </summary>
-    public AssetBundleCreateRequest Request { get; set; }
-
-    /// <summary>
-    /// Gets or sets the AssetBundle being loaded.
-    /// </summary>
-    public AssetBundle Bundle { get; set; }
-
-    /// <summary>
-    /// Gets or sets how this load operation should be resolved.
-    /// Setting the Bundle/Request property will automatically update this value.
-    /// </summary>
-    public AsyncAssetBundleLoadingResolve ResolveType { get; set; }
-}
-```
-
-Because this is a prefix API, the `Request` property will be null when the method is called and it is up to you to set it to a different value if you can handle the specified path.
-
-As you can see there is actually also a `Bundle` property available on the context object. Under normal circumstances, however, you cannot use the `Bundle` property on the the `AsyncAssetBundleLoadingContext`. In order to be able to use these, you must first call `ResourceRedirection.EnableSyncOverAsyncAssetLoads` once during your initialization logic. This will allow you to set the bundle directly so you don't have to go through the standard `AssetBundle` API to obtain a request object.
-
-It is, however, recommended that if you can that you set the `Request` property instead of the `Bundle` property as that will keep the operation asynchronous and not block the game while the asset is being loaded.
-
-If you update the `Request` property, remember to call the `Complete` to indicate your intentions regarding:
- * Whether or not the remaining prefixes should be skipped.
- * Whether or not the original method should be skipped.
-
-In addition, if we take a look at the `Parameters` property of the context object, we will find the following definition:
-
-```C#
-/// <summary>
-/// Class representing the original parameters of the load call.
-/// </summary>
-public class AssetBundleLoadingParameters
-{
-    /// <summary>
-    /// Gets the loaded path. Only relevant for 'LoadFromFile'.
-    /// </summary>
-    public string Path { get; }
-
-    /// <summary>
-    /// Gets the crc. Only relevant for 'LoadFromFile'.
-    /// </summary>
-    public uint Crc { get; }
-
-    /// <summary>
-    /// Gets the offset. Only relevant for 'LoadFromFile'.
-    /// </summary>
-    public ulong Offset { get; }
-
-    /// <summary>
-    /// Gets the type of call that is loading this asset bundle.
-    /// </summary>
-    public AssetBundleLoadType LoadType { get; }
-}
-
-/// <summary>
-/// Enum representing the different ways an asset bundle may be loaded.
-/// </summary>
-public enum AssetBundleLoadType
-{
-    /// <summary>
-    /// Indicates that the asset bundle is being loaded through a call to 'LoadFromFile' or 'LoadFromFileAsync'.
-    /// </summary>
-    LoadFromFile,
-}
-```
-
-As can be see, the current implementation only hooks the LoadFromFile/LoadFromFileAsync ways of loading AssetBundles, but this may be expanded in the future.
-
-It may also be worth looking at the `GetNormalizedPath()` method instead of the `Path` property of the original call parameters. This is because the path passed to the method can take literally any form:
- * Absolute path
- * Relative path
- * Include a stray '..' in the middle of the path
- 
-Another way to change the result of the asset bundle load operation is to change the value of the `Path`, `Crc` and `Offset` properties in the `Parameters` property. If you do this, you likely will not want to call the Complete method, as you will want the original method to still be called.
-
-An important additional way to subscribe to the prefix asset bundle loading operations are through the method `RegisterAsyncAndSyncAssetBundleLoadingHook( int priority, Action<IAssetBundleLoadingContext> action )`. This method will handle both async and sync asset bundle loading operations. The `IAssetLoadingContext` is an interface implemented by both the `AssetBundleLoadingContext` and `AsyncAssetBundleLoadingContext`.
-
-Do note, that if you want to use this method you must first call the method `EnableSyncOverAsyncAssetLoads()` to enable the hooks required for this to work.
-
-### About Recursion
-As you may have noticed, all of the context classes shown in the previous sections had a method called `DisableRecursion` and that there is a method called `DisableRecursionPermanently` directly on the `ResourceRedirection` class.
-
-The purpose of these method is, as it name states, to disable recursion. That only leaves the question, when does recursion occur?
-
-Recursion will happen anytime you try to load an asset/resource/asset bundle from within your callback using the `AssetBundle` or `Resources` API. Essentially, what it means is that all callbacks (except the one loading the resource) will get a chance to modify the resource that is being loaded by your callback.
-
-This may not always be desirable, so if you call the method `DisableRecursion` *before* you load your resource, this recursive behaviour is disabled. In many other cases, this behaviour is very desirable because it means that it is less important to set the *correct* priority, whatever that may be.
-
-Recursion has an important side effect for other prefix/postfix callbacks, and that is that they will always be called if you make a recursive load call in your callback, even if you indicate through the `Complete` method that they should not be called. So if, in your scenario, it is important to avoid this, you must disable recursion.
-
-`DisableRecursionPermanently` disables recursion permanently for all subscribers to the ResourceRedirection API no matter who calls it. This is a game-wide setting that should be decided upon between plugin developers rather than by the hand of the individual.
-
-These options exists only because it is not currently known whether or not having recursion enabled gives the best experience to plugin developers.
-
-### Implementing an Asset Redirector
-Here's an example of how a resource redirection may be implemented to hook all `Texture2D` objects loaded through the `AssetBundle` API:
-
-```C#
-class TextureReplacementPlugin
-{
-    void Awake()
-    {
-        ResourceRedirection.RegisterAssetLoadedHook(
-            behaviour: HookBehaviour.OneCallbackPerResourceLoaded,
-            priority: 0,
-            action: AssetLoaded );
-    }
-
-    public void AssetLoaded( AssetLoadedContext context )
-    {
-        if( context.Asset is Texture2D texture2d ) // also acts as a null check
-        {
-            // TODO: Modify, replace or dump the texture
-                
-            context.Asset = texture2d; // only need to update the reference if you created a new texture
-            context.Complete(
-                skipRemainingPostfixes: true );
-        }
-    }
-}
-```
-
-### Implemting an AssetBundle Redirector
-Here's an example of how a resource redirection may be implemented to redirect non-existing resources to a seperate 'mods' directory.
-
-```C#
-class AssetBundleRedirectorPlugin
-{
-    void Awake()
-    {
-        ResourceRedirection.RegisterAssetBundleLoadingHook(
-            priority: 1000,
-            action: AssetBundleLoading );
-
-        ResourceRedirection.RegisterAsyncAssetBundleLoadingHook(
-            priority: 1000,
-            action: AsyncAssetBundleLoading );
-    }
-
-    public void AssetBundleLoading( AssetBundleLoadingContext context )
-    {
-        if( !File.Exists( context.Parameters.Path ) )
-        {
-            // the game is trying to load a path that does not exist, lets redirect to our own resources
-		    
-            // obtain different resource path
-            var normalizedPath = context.GetNormalizedPath();
-            var modFolderPath = Path.Combine( "mods", normalizedPath );
-		    
-            // if the path exists, let's load that instead
-            if( File.Exists( modFolderPath ) )
-            {
-                var bundle = AssetBundle.LoadFromFile( modFolderPath );
-		    
-                context.Bundle = bundle;
-                context.Complete(
-                    skipRemainingPrefixes: true,
-                    skipOriginalCall: true );
-            }
-        }
-    }
-
-    public void AsyncAssetBundleLoading( AsyncAssetBundleLoadingContext context )
-    {
-        if( !File.Exists( context.Parameters.Path ) )
-            {
-            // the game is trying to load a path that does not exist, lets redirect to our own resources
-		    
-            // obtain different resource path
-            var normalizedPath = context.GetNormalizedPath();
-            var modFolderPath = Path.Combine( "mods", normalizedPath );
-		    
-            // if the path exists, let's load that instead
-            if( File.Exists( modFolderPath ) )
-            {
-                var request = AssetBundle.LoadFromFileAsync( modFolderPath );
-		    
-                context.Request = request;
-                context.Complete(
-                    skipRemainingPrefixes: true,
-                    skipOriginalCall: true );
-            }
-        }
-    }
-}
-```
-
-Here's a smart way to implement the same thing, by having a single method that hooks both the synchronous and asynchronous method at the same time:
-
-```C#
-class AssetBundleRedirectorSyncOverAsyncPlugin
-{
-    void Awake()
-    {
-        ResourceRedirection.EnableSyncOverAsyncAssetLoads();
-	    
-        ResourceRedirection.RegisterAsyncAndSyncAssetBundleLoadingHook(
-            priority: 1000,
-            action: AssetBundleLoading );
-    }
-
-    public void AssetBundleLoading( IAssetBundleLoadingContext context )
-    {
-        if( !File.Exists( context.Parameters.Path ) )
-        {
-            // the game is trying to load a path that does not exist, lets redirect to our own resources
-	    
-            // obtain different resource path
-            var normalizedPath = context.GetNormalizedPath();
-            var modFolderPath = Path.Combine( "mods", normalizedPath );
-	    
-            // if the path exists, let's load that instead
-            if( File.Exists( modFolderPath ) )
-            {
-                var bundle = AssetBundle.LoadFromFile( modFolderPath );
-	    
-                context.Bundle = bundle;
-                context.Complete(
-                    skipRemainingPrefixes: true,
-                    skipOriginalCall: true );
-            }
-        }
-    }
-}
-```
-
-While this is clean it causes all asset bundles to be loaded synchronously, potentially locking up the game causing FPS lag. Another approach that also handles that could look like this:
-
-```C#
-class SmartAssetBundleRedirectorSyncOverAsyncPlugin
-{
-    void Awake()
-    {
-        ResourceRedirection.EnableSyncOverAsyncAssetLoads();
-	    
-        ResourceRedirection.RegisterAsyncAndSyncAssetBundleLoadingHook(
-            priority: 1000,
-            action: AssetBundleLoading );
-    }
-
-    public void AssetBundleLoading( IAssetBundleLoadingContext context )
-    {
-        if( !File.Exists( context.Parameters.Path ) )
-        {
-            // the game is trying to load a path that does not exist, lets redirect to our own resources
-	    
-            // obtain different resource path
-            var normalizedPath = context.GetNormalizedPath();
-            var modFolderPath = Path.Combine( "mods", normalizedPath );
-	    
-            // if the path exists, let's load that instead
-            if( File.Exists( modFolderPath ) )
-            {
-                if( context is AsyncAssetBundleLoadingContext asyncContext )
-                {
-                    var request = AssetBundle.LoadFromFileAsync( modFolderPath );
-                    asyncContext.Request = request;
-                }
-                else
-                {
-                    var bundle = AssetBundle.LoadFromFile( modFolderPath );
-                    context.Bundle = bundle;
-                }
-	    
-                context.Complete(
-                    skipRemainingPrefixes: true,
-                    skipOriginalCall: true );
-            }
-        }
-    }
-}
-```
-
-Here's the redirector that is activated if the `EmulateAssetBundles` option is enabled in the plugin, which allows loading asset bundles from a different location than the game is requesting the bundle from:
-
-```C#
-/// <summary>
-/// Creates an asset bundle hook that attempts to load asset bundles in the emulation directory
-/// over the default asset bundles if they exist.
-/// </summary>
-/// <param name="hookPriority">Priority of the hook.</param>
-/// <param name="emulationDirectory">The directory to look for the asset bundles in.</param>
-public static void EnableEmulateAssetBundles( int hookPriority, string emulationDirectory )
-{
-    RegisterAssetBundleLoadingHook( hookPriority, ctx => HandleAssetBundleEmulation( ctx, SetBundle ) );
-    RegisterAsyncAssetBundleLoadingHook( hookPriority, ctx => HandleAssetBundleEmulation( ctx, SetRequest ) );
-		    
-    // define base callback
-    void HandleAssetBundleEmulation<T>( T context, Action<T, string> changeBundle )
-        where T : IAssetBundleLoadingContext
-    {
-        if( context.Parameters.LoadType == AssetBundleLoadType.LoadFromFile )
-        {
-            var normalizedPath = context.GetNormalizedPath();
-            var emulatedPath = Path.Combine( emulationDirectory, normalizedPath );
-            if( File.Exists( emulatedPath ) )
-            {
-                changeBundle( context, emulatedPath );
-		    
-                context.Complete(
-                    skipRemainingPrefixes: true,
-                    skipOriginalCall: true );
-            }
-        }
-    }
-		    
-    // synchronous specific code
-    void SetBundle( AssetBundleLoadingContext context, string path )
-    {
-        context.Bundle = AssetBundle.LoadFromFile( path, context.Parameters.Crc, context.Parameters.Offset );
-    }
-		    
-    // asynchronous specific code
-    void SetRequest( AsyncAssetBundleLoadingContext context, string path )
-    {
-        context.Request = AssetBundle.LoadFromFileAsync( path, context.Parameters.Crc, context.Parameters.Offset );
-    }
-}
-```
-
-Here's the redirector that is activated if the `RedirectMissingAssetBundles` option is enabled in the plugin, which essentially simply loads an empty asset bundle if an asset bundle cannot be found:
-
-```C#
-/// <summary>
-/// Creates an asset bundle hook that redirects asset bundles loads to an empty
-/// asset bundle if the file that is being loaded does not exist.
-/// </summary>
-/// <param name="hookPriority">Priority of the hook.</param>
-public static void EnableRedirectMissingAssetBundlesToEmptyAssetBundle( int hookPriority )
-{
-    RegisterAssetBundleLoadingHook( hookPriority, ctx => HandleMissingBundle( ctx, SetBundle ) );
-    RegisterAsyncAssetBundleLoadingHook( hookPriority, ctx => HandleMissingBundle( ctx, SetRequest ) );
-	    
-    // define base callback
-    void HandleMissingBundle<TContext>( TContext context, Action<TContext, byte[]> changeBundle )
-        where TContext : IAssetBundleLoadingContext
-    {
-        if( context.Parameters.LoadType == AssetBundleLoadType.LoadFromFile
-            && !File.Exists( context.Parameters.Path ) )
-        {
-            var buffer = Properties.Resources.empty;
-            CabHelper.RandomizeCab( buffer );
-	    
-            changeBundle( context, buffer );
-	    
-            context.Complete(
-                skipRemainingPrefixes: true,
-                skipOriginalCall: true );
-	    
-            XuaLogger.ResourceRedirector.Warn( "Tried to load non-existing asset bundle: " + context.Parameters.Path );
-        }
-    }
-	    
-    // synchronous specific code
-    void SetBundle( AssetBundleLoadingContext context, byte[] assetBundleData )
-    {
-        var bundle = AssetBundle.LoadFromMemory( assetBundleData );
-        context.Bundle = bundle;
-    }
-	    
-    // asynchronous specific code
-    void SetRequest( AsyncAssetBundleLoadingContext context, byte[] assetBundleData )
-    {
-        var request = AssetBundle.LoadFromMemoryAsync( assetBundleData );
-        context.Request = request;
-    }
-}
-```
-
-### Implementing an Asset/Resource Handler (Auto Translator)
-This section shows how to implement an asset/resource redirector that respects the Auto Translator configuration.
-
-The `XUnity.AutoTranslator.Core.Plugin.dll` assembly has a base class that can be used to implement a plugin that dumps resources for the purposes of translation.
-
-This class simply hooks the postfix to the load of assets from the `AssetBundle` and the `Resources` API. Here's how the base class looks:
-
-```C#
-/// <summary>
-/// Base implementation of resource redirect handler that takes care of the plumming for a
-/// resource redirector that is interested in either updating or dumping redirected resources.
-/// </summary>
-/// <typeparam name="TAsset">The type of asset being redirected.</typeparam>
-public abstract class AssetLoadedHandlerBaseV2<TAsset>
-    where TAsset : UnityEngine.Object
-{
-    /// <summary>
-    /// Method invoked when an asset should be updated or replaced.
-    /// </summary>
-    /// <param name="calculatedModificationPath">This is the modification path calculated in the CalculateModificationFilePath method.</param>
-    /// <param name="asset">The asset to be updated or replaced.</param>
-    /// <param name="context">This is the context containing all relevant information for the resource redirection event.</param>
-    /// <returns>A bool indicating if the event should be considered handled.</returns>
-    protected abstract bool ReplaceOrUpdateAsset( string calculatedModificationPath, ref TAsset asset, IAssetOrResourceLoadedContext context );
-
-    /// <summary>
-    /// Method invoked when an asset should be dumped.
-    /// </summary>
-    /// <param name="calculatedModificationPath">This is the modification path calculated in the CalculateModificationFilePath method.</param>
-    /// <param name="asset">The asset to be updated or replaced.</param>
-    /// <param name="context">This is the context containing all relevant information for the resource redirection event.</param>
-    /// <returns>A bool indicating if the event should be considered handled.</returns>
-    protected abstract bool DumpAsset( string calculatedModificationPath, TAsset asset, IAssetOrResourceLoadedContext context );
-
-    /// <summary>
-    /// Method invoked when a new resource event is fired to calculate a unique path for the resource.
-    /// </summary>
-    /// <param name="asset">The asset to be updated or replaced.</param>
-    /// <param name="context">This is the context containing all relevant information for the resource redirection event.</param>
-    /// <returns>A string uniquely representing a path for the redirected resource.</returns>
-    protected abstract string CalculateModificationFilePath( TAsset asset, IAssetOrResourceLoadedContext context );
-
-    /// <summary>
-    /// Method to be invoked to indicate if the asset should be handled or not.
-    /// </summary>
-    /// <param name="asset">The asset to be updated or replaced.</param>
-    /// <param name="context">This is the context containing all relevant information for the resource redirection event.</param>
-    /// <returns>A bool indicating if the asset should be handled.</returns>
-    protected abstract bool ShouldHandleAsset( TAsset asset, IAssetOrResourceLoadedContext context );
-}
-```
-
-The Auto Translation includes one default implementation of this class for TextAssets. It looks like this:
-
-```C#
-internal class TextAssetLoadedHandler : AssetLoadedHandlerBaseV2<TextAsset>
-{
-    protected override string CalculateModificationFilePath( TextAsset asset, IAssetOrResourceLoadedContext context )
-    {
-        return context.GetPreferredFilePath( asset, ".txt" );
-    }
-
-    protected override bool DumpAsset( string calculatedModificationPath, TextAsset asset, IAssetOrResourceLoadedContext context )
-    {
-        Directory.CreateDirectory( new FileInfo( calculatedModificationPath ).Directory.FullName );
-        File.WriteAllBytes( calculatedModificationPath, asset.bytes );
-
-        return true;
-    }
-
-    protected override bool ReplaceOrUpdateAsset( string calculatedModificationPath, ref TextAsset asset, IAssetOrResourceLoadedContext context )
-    {
-        RedirectedResource file;
-
-        var files = RedirectedDirectory.GetFile( calculatedModificationPath ).ToList();
-        if( files.Count == 0 )
-        {
-		    return false;
-        }
-        else
-        {
-            if( files.Count > 1 )
-            {
-                XuaLogger.AutoTranslator.Warn( "Found more than one resource file in the same path: " + calculatedModificationPath );
-            }
-		    
-            file = files.FirstOrDefault();
-        }
-
-        if( file != null )
-        {
-            using( var stream = file.OpenStream() )
-            {
-                var data = stream.ReadFully( (int)stream.Length );
-                var text = Encoding.UTF8.GetString( data );
-		    
-                var ext = asset.GetOrCreateExtensionData<TextAssetExtensionData>();
-                ext.Data = data;
-                ext.Text = text;
-		    
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected override bool ShouldHandleAsset( TextAsset asset, IAssetOrResourceLoadedContext context )
-    {
-        return !context.HasReferenceBeenRedirectedBefore( asset );
-    }
-}
-```
-
-Note that when accessing the resource file, we do not use the standard file API to obtain a stream to get the data in the file. Instead we use the RedirectedDirectory facade. This will also look in ZIP files and simply treat a ZIP file as a directory when making the lookup.
-
-Another examples of an implementation of this class would be for Koikatsu that enables replacing its custom resources:
-
-```C#
-public class ScenarioDataResourceRedirector : AssetLoadedHandlerBaseV2<ScenarioData>
-{
-   public ScenarioDataResourceRedirector()
-   {
-      CheckDirectory = true;
-   }
-
-   protected override string CalculateModificationFilePath( ScenarioData asset, IAssetOrResourceLoadedContext context )
-   {
-      return context.GetPreferredFilePathWithCustomFileName( asset, null )
-         .Replace( ".unity3d", "" );
-   }
-
-   protected override bool DumpAsset( string calculatedModificationPath, ScenarioData asset, IAssetOrResourceLoadedContext context )
-   {
-      var defaultTranslationFile = Path.Combine( calculatedModificationPath, "translation.txt" );
-      var cache = new SimpleTextTranslationCache(
-         file: defaultTranslationFile,
-         loadTranslationsInFile: false );
-
-      foreach( var param in asset.list )
-      {
-         if( param.Command == Command.Text )
-         {
-            for( int i = 0; i < param.Args.Length; i++ )
-            {
-               var key = param.Args[ i ];
-
-               if( !string.IsNullOrEmpty( key ) && LanguageHelper.IsTranslatable( key ) )
-               {
-                  cache.AddTranslationToCache( key, key );
-               }
-            }
-         }
-      }
-
-      return true;
-   }
-
-   protected override bool ReplaceOrUpdateAsset( string calculatedModificationPath, ref ScenarioData asset, IAssetOrResourceLoadedContext context )
-   {
-      var defaultTranslationFile = Path.Combine( calculatedModificationPath, "translation.txt" );
-      var redirectedResources = RedirectedDirectory.GetFilesInDirectory( calculatedModificationPath, ".txt" );
-      var streams = redirectedResources.Select( x => x.OpenStream() );
-      var cache = new SimpleTextTranslationCache(
-         outputFile: defaultTranslationFile,
-         inputStreams: streams,
-         allowTranslationOverride: false,
-         closeStreams: true );
-
-      foreach( var param in asset.list )
-      {
-         if( param.Command == Command.Text )
-         {
-            for( int i = 0; i < param.Args.Length; i++ )
-            {
-               var key = param.Args[ i ];
-               if( !string.IsNullOrEmpty( key ) )
-               {
-                  if( cache.TryGetTranslation( key, true, out var translated ) )
-                  {
-                     param.Args[ i ] = translated;
-                  }
-                  else if( AutoTranslatorSettings.IsDumpingRedirectedResourcesEnabled && LanguageHelper.IsTranslatable( key ) )
-                  {
-                     cache.AddTranslationToCache( key, key );
-                  }
-               }
-            }
-         }
-      }
-
-      return true;
-   }
-
-   protected override bool ShouldHandleAsset( ScenarioData asset, IAssetOrResourceLoadedContext context )
-   {
-      return !context.HasReferenceBeenRedirectedBefore( asset );
-   }
-}
-```
-
-Note that this implementation uses a `SimpleTextTranslationCache` to lookup translations. Using this class for translation lookups have the following benefits:
- * Whitespace doesn't have to match exactly.
- * It respects the `RedirectedResourceDetectionStrategy` configuration. If this is not respected the plugin may double translate certain texts.
- * When loading text translation files, it supports the same text format that is otherwise used by the plugin.
-
-Once you have implemented one of these classes, you just need to instantiate it and it will do it's magic. 
+`EnableTextureToggling` 启用 ALT+T 热键是否也会切换纹理。这绝不能保证
