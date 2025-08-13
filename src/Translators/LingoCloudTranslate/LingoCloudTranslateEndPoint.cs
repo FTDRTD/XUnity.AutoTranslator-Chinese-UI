@@ -38,21 +38,21 @@ namespace LingoCloudTranslate
 
       private static readonly string HttpServicePointTemplateUrl = "https://api.interpreter.caiyunai.com/v1/translator";
 
-      public override string Id => "LingoCloudTranslate";
+      public override string Id => "彩云小译";
 
-      public override string FriendlyName => "CaiYun Translator";
+      public override string FriendlyName => "彩云翻译";
 
       public string _token;
 
       public override void Initialize( IInitializationContext context )
       {
-         _token = context.GetOrCreateSetting( "LingoCloud", "LingoCloudToken", "" );
-         if( string.IsNullOrEmpty( _token ) ) throw new EndpointInitializationException( "The LingoCloudTranslate endpoint requires an App Id which has not been provided." );
+         _token = context.GetOrCreateSetting( "彩云小译", "LingoCloudToken", "" );
+         if( string.IsNullOrEmpty( _token ) ) throw new EndpointInitializationException( "彩云翻译端点需要一个尚未提供的应用程序Id." );
 
          context.DisableCertificateChecksFor( "api.interpreter.caiyunai.com" );
 
-         if( !SupportedLanguages.ContainsKey( context.SourceLanguage ) ) throw new EndpointInitializationException( $"The source language '{context.SourceLanguage}' is not supported." );
-         if( !SupportedLanguages.ContainsKey( context.DestinationLanguage ) ) throw new EndpointInitializationException( $"The destination language '{context.DestinationLanguage}' is not supported." );
+         if( !SupportedLanguages.ContainsKey( context.SourceLanguage ) ) throw new EndpointInitializationException( $"源语言 '{context.SourceLanguage}' 不支持." );
+         if( !SupportedLanguages.ContainsKey( context.DestinationLanguage ) ) throw new EndpointInitializationException( $"目标语言 '{context.DestinationLanguage}' 不支持." );
 
       }
 

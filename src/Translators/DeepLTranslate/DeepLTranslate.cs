@@ -23,9 +23,9 @@ namespace DeepLTranslate
          "ar", "bg", "cs", "da", "de", "el", "en", "en-gb", "en-us","es", "et", "fi", "fr", "hu", "id", "it", "ja", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "pt-br", "pt-pt", "ro", "ru", "sk", "sl", "sv", "tr", "uk", "zh", "zh-hans", "zh-hant"
       };
 
-      public override string Id => "DeepLTranslate";
+      public override string Id => "DeepL翻译";
 
-      public override string FriendlyName => "DeepL Translator";
+      public override string FriendlyName => "DeepL 翻译";
 
       public override int MaxConcurrency => 1;
 

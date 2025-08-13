@@ -36,9 +36,9 @@ namespace PapagoTranslate
       private int _translationCount = 0;
       private int _resetAfter = 0;
 
-      public override string Id => "PapagoTranslate";
+      public override string Id => "Papago翻译";
 
-      public override string FriendlyName => "Papago Translator";
+      public override string FriendlyName => "Papago 翻译";
 
       public override int MaxTranslationsPerRequest => 10;
 

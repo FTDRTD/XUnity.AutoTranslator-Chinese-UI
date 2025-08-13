@@ -69,7 +69,7 @@ namespace GoogleTranslate
 
       public override string Id => KnownTranslateEndpointNames.GoogleTranslateV2;
 
-      public override string FriendlyName => "Google! Translate (v2)";
+      public override string FriendlyName => "谷歌翻译 (v2)";
 
       public override int MaxTranslationsPerRequest => 10;
 

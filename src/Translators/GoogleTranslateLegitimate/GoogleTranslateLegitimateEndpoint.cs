@@ -24,9 +24,9 @@ namespace GoogleTranslateLegitimate
 
       private string _key;
 
-      public override string Id => "GoogleTranslateLegitimate";
+      public override string Id => "谷歌翻译合法";
 
-      public override string FriendlyName => "Google! Translate (Authenticated)";
+      public override string FriendlyName => "谷歌翻译 (已认证)";
 
       public override int MaxTranslationsPerRequest => 10;
 

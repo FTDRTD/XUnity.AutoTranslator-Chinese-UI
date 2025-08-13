@@ -59,9 +59,9 @@ namespace BingTranslate
          _cookieContainer = new CookieContainer();
       }
 
-      public override string Id => "BingTranslate";
+      public override string Id => "Bing翻译";
 
-      public override string FriendlyName => "Bing Translator";
+      public override string FriendlyName => "Bing翻译";
 
       private string FixLanguage( string lang )
       {
@@ -81,7 +81,7 @@ namespace BingTranslate
 
       public override void Initialize( IInitializationContext context )
       {
-         // Configure service points / service point manager
+         // 配置服务点/服务点管理器
          context.DisableCertificateChecksFor( "www.bing.com" );
 
          if( !SupportedLanguages.Contains( FixLanguage( context.SourceLanguage ) ) ) throw new EndpointInitializationException( $"The source language '{context.SourceLanguage}' is not supported." );
@@ -97,7 +97,7 @@ namespace BingTranslate
 
             _hasSetup = true;
 
-            // Setup TKK and cookies
+            // 设置TKK和Cookie
             var enumerator = SetupIGAndIID();
             while( enumerator.MoveNext() ) yield return enumerator.Current;
          }

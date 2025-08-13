@@ -35,7 +35,7 @@ namespace XUnity.AutoTranslator.Plugin.Core.UI
       {
          GUI.Box( _windowRect, GUIUtil.none, GUIUtil.GetWindowBackgroundStyle() );
 
-         _windowRect = GUI.Window( WindowId, _windowRect, (GUI.WindowFunction)CreateWindowUI, "---- XUnity.AutoTranslator UI ----" );
+         _windowRect = GUI.Window( WindowId, _windowRect, (GUI.WindowFunction)CreateWindowUI, "---- XUnity.自动翻译用户界面 ----" );
 
          if( GUIUtil.IsAnyMouseButtonOrScrollWheelDownSafe )
          {
@@ -101,7 +101,7 @@ namespace XUnity.AutoTranslator.Plugin.Core.UI
             groupHeight = GUIUtil.LabelHeight + ( GUIUtil.RowHeight * rows ) + ( GUIUtil.ComponentSpacing * ( rows + 1 ) ) - GUIUtil.HalfComponentSpacing;
             GUI.Box( GUIUtil.R( GUIUtil.HalfComponentSpacing, posy, WindowWidth - GUIUtil.ComponentSpacing, groupHeight ), "" );
 
-            GUI.Label( GUIUtil.R( col1x, posy, col12, GUIUtil.LabelHeight ), "---- Command Panel ----", GUIUtil.LabelCenter );
+            GUI.Label( GUIUtil.R( col1x, posy, col12, GUIUtil.LabelHeight ), "---- 命令面板 ----", GUIUtil.LabelCenter );
             posy += GUIUtil.RowHeight + GUIUtil.ComponentSpacing;
 
             for( int row = 0; row < rows; row++ )
@@ -129,14 +129,14 @@ namespace XUnity.AutoTranslator.Plugin.Core.UI
             groupHeight = GUIUtil.LabelHeight + ( GUIUtil.RowHeight * 2 ) + ( GUIUtil.ComponentSpacing * 2 );
             GUI.Box( GUIUtil.R( GUIUtil.HalfComponentSpacing, posy, WindowWidth - GUIUtil.ComponentSpacing, groupHeight ), "" );
 
-            GUI.Label( GUIUtil.R( col1x, posy, col12, GUIUtil.LabelHeight ), "---- Select a Translator ----", GUIUtil.LabelCenter );
+            GUI.Label( GUIUtil.R( col1x, posy, col12, GUIUtil.LabelHeight ), "---- 选择翻译 ----", GUIUtil.LabelCenter );
             posy += GUIUtil.RowHeight + GUIUtil.ComponentSpacing;
 
-            GUI.Label( GUIUtil.R( col1x, posy, GUIUtil.LabelWidth + 10, GUIUtil.LabelHeight ), "Translator: " );
+            GUI.Label( GUIUtil.R( col1x, posy, GUIUtil.LabelWidth + 10, GUIUtil.LabelHeight ), "翻译:  " );
             float endpointDropdownPosy = posy;
             posy += GUIUtil.RowHeight + GUIUtil.HalfComponentSpacing;
 
-            GUI.Label( GUIUtil.R( col1x, posy, GUIUtil.LabelWidth, GUIUtil.LabelHeight ), "Fallback: " );
+            GUI.Label( GUIUtil.R( col1x, posy, GUIUtil.LabelWidth, GUIUtil.LabelHeight ), "备用: " );
             float fallbackDropdownPosy = posy;
             posy += GUIUtil.RowHeight + GUIUtil.ComponentSpacing;
 
@@ -145,7 +145,7 @@ namespace XUnity.AutoTranslator.Plugin.Core.UI
             groupHeight = GUIUtil.LabelHeight + ( GUIUtil.RowHeight * labels.Count ) + ( GUIUtil.ComponentSpacing * ( labels.Count + 1 ) ) - GUIUtil.HalfComponentSpacing;
             GUI.Box( GUIUtil.R( GUIUtil.HalfComponentSpacing, posy, WindowWidth - GUIUtil.ComponentSpacing, groupHeight ), "" );
 
-            GUI.Label( GUIUtil.R( col1x, posy, col12, GUIUtil.LabelHeight ), "---- Status ----", GUIUtil.LabelCenter );
+            GUI.Label( GUIUtil.R( col1x, posy, col12, GUIUtil.LabelHeight ), "---- 状态 ----", GUIUtil.LabelCenter );
             posy += GUIUtil.RowHeight + GUIUtil.ComponentSpacing;
 
             foreach( var label in labels )

@@ -42,7 +42,7 @@ using MonoMod.RuntimeDetour;
 namespace XUnity.AutoTranslator.Plugin.Core
 {
    /// <summary>
-   /// Main plugin class for the AutoTranslator.
+   /// 自动翻译器的主插件类.
    /// </summary>
    public class AutoTranslationPlugin :
 #if MANAGED
@@ -53,7 +53,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
       ITranslationRegistry
    {
       /// <summary>
-      /// Allow the instance to be accessed statically, as only one will exist.
+      /// 允许静态访问实例，因为只存在一个实例.
       /// </summary>
       internal static AutoTranslationPlugin Current;
 
@@ -74,14 +74,14 @@ namespace XUnity.AutoTranslator.Plugin.Core
       private List<Action<ComponentTranslationContext>> _shouldIgnore = new List<Action<ComponentTranslationContext>>();
 
       /// <summary>
-      /// Keeps track of things to copy to clipboard.
+      /// 跟踪要复制到剪贴板的内容.
       /// </summary>
       private List<string> _textsToCopyToClipboardOrdered = new List<string>();
       private HashSet<string> _textsToCopyToClipboard = new HashSet<string>();
       private float _clipboardUpdated = 0.0f;
 
       /// <summary>
-      /// Texts currently being scheduled for translation by 'immediate' components.
+      /// 目前计划由“即时”组件翻译的文本.
       /// </summary>
       private HashSet<string> _immediatelyTranslating = new HashSet<string>();
 
@@ -102,25 +102,25 @@ namespace XUnity.AutoTranslator.Plugin.Core
       private bool _hasUiBeenSetup = false;
 
       /// <summary>
-      /// Initialized the plugin.
+      /// 已初始化插件.
       /// </summary>
       public void Initialize()
       {
-         // Setup 'singleton'
+         // 安装“singleton”'
          Current = this;
 
          Paths.Initialize();
 
-         // because we only use harmony/MonoMod through reflection due to
-         // version compatibility issues, we call this method to
-         // ensure that it is loaded before we attempt to obtain
-         // various harmony/MonoMod classes through reflection
+         // 因为我们只通过反射使用和声/MonoMod
+         // 版本兼容性问题，我们称此方法为
+         // 在我们尝试获取之前，请确保它已加载
+         // 通过反射获得各种和声/MonoMod类
          HarmonyLoader.Load();
 
-         // Setup configuration
+         // 设置配置
          Settings.Configure();
 
-         // Setup console, if enabled
+         // 设置控制台（如果启用）
          DebugConsole.Enable();
 
          InitializeHarmonyDetourBridge();
@@ -129,7 +129,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
 
          InitializeTextTranslationCaches();
 
-         // Setup hooks
+         // 设置挂钩
          HooksSetup.InstallTextHooks();
          HooksSetup.InstallImageHooks();
          HooksSetup.InstallSpriteRendererHooks();
@@ -145,25 +145,25 @@ namespace XUnity.AutoTranslator.Plugin.Core
          TranslationManager.InitializeEndpoints();
          SpamChecker = new SpamChecker( TranslationManager );
 
-         // WORKAROUND: Initialize text parsers with delegate indicating if text should be translated
+         // 解决方法：使用委托初始化文本解析器，指示是否应翻译文本
          UnityTextParsers.Initialize();
 
-         // resource redirectors
+         // 资源重定向器
          InitializeResourceRedirector();
 
-         // validate configuration
+         // 验证配置
          ValidateConfiguration();
 
-         // enable scene scan
+         // 启用场景扫描
          EnableSceneLoadScan();
 
-         // load fallback fonts
+         // 加载回退字体
          LoadFallbackFont();
 
-         // load all translations from files
+         // 从文件加载所有翻译
          LoadTranslations( false );
 
-         XuaLogger.AutoTranslator.Info( $"Loaded XUnity.AutoTranslator into Unity [{Application.unityVersion}] game." );
+         XuaLogger.AutoTranslator.Info( $"加载XUnity。自动翻译成Unity [{Application.unityVersion}] 游戏." );
       }
 
 
@@ -181,12 +181,12 @@ namespace XUnity.AutoTranslator.Plugin.Core
             }
             else
             {
-               XuaLogger.AutoTranslator.Info( "Unknown Error at CheckRegexCompiledSupport" );
+               XuaLogger.AutoTranslator.Info( "检查正则表达式编译支持时出现未知错误" );
             }
          }
          catch( Exception e )
          {
-            XuaLogger.AutoTranslator.Info( "The current version of the game doesn't support compiled Regex" );
+            XuaLogger.AutoTranslator.Info( "当前版本的游戏不支持编译的正则表达式" );
          }
       }
       private static void LoadFallbackFont()
@@ -198,13 +198,13 @@ namespace XUnity.AutoTranslator.Plugin.Core
                var font = FontCache.GetOrCreateFallbackFontTextMeshPro();
                if( UnityTypes.TMP_Settings_Properties.FallbackFontAssets == null )
                {
-                  XuaLogger.AutoTranslator.Info( $"Cannot use fallback font because it is not supported in this version." );
+                  XuaLogger.AutoTranslator.Info( $"无法使用回退字体，因为此版本不支持它." );
                   return;
                }
 
                if( font == null )
                {
-                  XuaLogger.AutoTranslator.Warn( $"Could not load fallback font for TextMesh Pro: " + Settings.FallbackFontTextMeshPro );
+                  XuaLogger.AutoTranslator.Warn( $"无法加载TextMesh Pro的回退字体: " + Settings.FallbackFontTextMeshPro );
                   return;
                }
 
@@ -216,12 +216,12 @@ namespace XUnity.AutoTranslator.Plugin.Core
 #endif
                fallbacks.Add( font );
 
-               XuaLogger.AutoTranslator.Info( $"Loaded fallback font for TextMesh Pro: " + Settings.FallbackFontTextMeshPro );
+               XuaLogger.AutoTranslator.Info( $"TextMesh Pro已加载回退字体: " + Settings.FallbackFontTextMeshPro );
             }
          }
          catch( Exception e )
          {
-            XuaLogger.AutoTranslator.Error( e, "An error occurred while trying to load fallback font for TextMesh Pro." );
+            XuaLogger.AutoTranslator.Error( e, "尝试加载TextMesh Pro的回退字体时出错." );
          }
       }
 
@@ -236,7 +236,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
          }
          catch( Exception e )
          {
-            XuaLogger.AutoTranslator.Error( e, "An error occurred while initializing harmony detour bridge." );
+            XuaLogger.AutoTranslator.Error( e, "初始化和谐绕行桥时出错." );
          }
       }
 
@@ -254,7 +254,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
             TextCache = new TextTranslationCache();
             TextCache.TextTranslationFileChanged += TextCache_TextTranslationFileChanged;
 
-            var path = Path.Combine( Settings.TranslationsPath, "plugins" );
+            var path = Path.Combine( Settings.TranslationsPath, "插件" );
             var directory = new DirectoryInfo( path );
             if( directory.Exists )
             {
@@ -267,7 +267,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
          }
          catch( Exception e )
          {
-            XuaLogger.AutoTranslator.Error( e, "An error occurred while initializing text translation caches." );
+            XuaLogger.AutoTranslator.Error( e, "初始化文本翻译缓存时出错." );
          }
       }
 
@@ -307,7 +307,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
          }
          catch( Exception e )
          {
-            XuaLogger.AutoTranslator.Error( e, "An error occurred while initializing resource redirectors." );
+            XuaLogger.AutoTranslator.Error( e, "初始化资源重定向器时出错." );
          }
       }
 
@@ -329,7 +329,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
          }
          catch( Exception e )
          {
-            XuaLogger.AutoTranslator.Error( e, "An error occurred while setting up UI." );
+            XuaLogger.AutoTranslator.Error( e, "设置UI时出错." );
          }
          finally
          {
@@ -348,52 +348,52 @@ namespace XUnity.AutoTranslator.Plugin.Core
             new List<ToggleViewModel>
             {
                new ToggleViewModel(
-                  " Translated",
-                  "<b>TRANSLATED</b>\nThe plugin currently displays translated texts. Disabling this does not mean the plugin will no longer perform translations, just that they will not be displayed.",
-                  "<b>NOT TRANSLATED</b>\nThe plugin currently displays untranslated texts.",
+                  " 翻译",
+                  "<b>翻译</b>\n该插件当前显示翻译后的文本。禁用此功能并不意味着插件将不再执行翻译，只是它们将不会显示.",
+                  "<b>未翻译</b>\n该插件当前显示未翻译的文本.",
                   ToggleTranslation, () => _isInTranslatedMode ),
                new ToggleViewModel(
-                  " Silent Logging",
-                  "<b>SILENT</b>\nThe plugin will not print out success messages to the log in relation to translations.",
-                  "<b>VERBOSE</b>\nThe plugin will print out success messages to the log in relation to translations.",
+                  " 日志记录",
+                  "<b>关闭</b>\n该插件不会在日志中打印出与翻译相关的成功消息.",
+                  "<b>详细</b>\n该插件将在日志中打印出与翻译相关的成功消息.",
                   ToggleSilentMode, () => Settings.EnableSilentMode ),
                new ToggleViewModel(
-                  " Translation Aggregator",
-                  "<b>SHOWN</b>\nThe translation aggregator window is shown.",
-                  "<b>HIDDEN</b>\nThe translation aggregator window is not shown.",
+                  " 翻译聚合器",
+                  "<b>显示</b>\n显示翻译聚合器窗口.",
+                  "<b>隐藏</b>\n翻译聚合器窗口未显示.",
                   ToggleTranslationAggregator, () => TranslationAggregatorWindow != null && TranslationAggregatorWindow.IsShown ),
             },
             new DropdownViewModel<TranslatorDropdownOptionViewModel, TranslationEndpointManager>(
                "----",
-               "<b>SELECT TRANSLATOR</b>\nNo translator is currently selected, which means no new translations will be performed. Please select one from the dropdown.",
+               "<b>选择翻译器</b>\n当前未选择翻译器，这意味着不会执行新的翻译。请从下拉列表中选择一个.",
                "----",
-               "<b>UNSELECT TRANSLATOR</b>\nThis will unselect the current translator, which means no new translations will be performed.",
+               "<b>取消选择翻译器</b>\n这将取消选择当前翻译器，这意味着不会执行新的翻译.",
                TranslationManager.AllEndpoints.Select( x => new TranslatorDropdownOptionViewModel( false, () => x == TranslationManager.CurrentEndpoint, x ) ).ToList(),
                OnEndpointSelected
             ),
             new DropdownViewModel<TranslatorDropdownOptionViewModel, TranslationEndpointManager>(
                "----",
-               "<b>SELECT FALLBACK TRANSLATOR</b>\nNo fallback translator is currently selected, which means if the primary translator fails no translation will be provided for the failing text. Please select one from the dropdown.",
+               "<b>选择回退转换器</b>\n当前未选择回退翻译器，这意味着如果主翻译器失败，将不会为失败的文本提供翻译。请从下拉列表中选择一个.",
                "----",
-               "<b>UNSELECT FALLBACK TRANSLATOR</b>\nThis will unselect the current fallback translator.",
+               "<b>取消选择回退转换器</b>\n这将取消选择当前的回退转换器.",
                TranslationManager.AllEndpoints.Select( x => new TranslatorDropdownOptionViewModel( true, () => x == TranslationManager.FallbackEndpoint, x ) ).ToList(),
                OnFallbackEndpointSelected
             ),
             new List<ButtonViewModel>
             {
-               new ButtonViewModel( "Reboot", "<b>REBOOT PLUGIN</b>\nReboots the plugin if it has been shutdown. This only works if the plugin was shut down due to consequtive errors towards the translation endpoint.", RebootPlugin, null ),
-               new ButtonViewModel( "Reload", "<b>RELOAD TRANSLATION</b>\nReloads all translation text files and texture files from disk.", ReloadTranslations, null ),
-               new ButtonViewModel( "Hook", "<b>MANUAL HOOK</b>\nTraverses the unity object tree for looking for anything that can be translated. Performs a translation if something is found.", ManualHook, null )
+               new ButtonViewModel( "重新启动", "<b>重启插件</b>\n如果插件已关闭，则重新启动。这仅在插件因对翻译端点的连续错误而关闭时有效.", RebootPlugin, null ),
+               new ButtonViewModel( "重新加载", "<b>重新加载翻译</b>\n从磁盘重新加载所有翻译文本文件和纹理文件.", ReloadTranslations, null ),
+               new ButtonViewModel( "钩子", "<b>手动挂钩</b>\n遍历unity对象树以查找任何可以翻译的内容。如果发现某些内容，则执行翻译.", ManualHook, null )
             },
             new List<LabelViewModel>
             {
-               new LabelViewModel( "Version: ", () => PluginData.Version ),
-               new LabelViewModel( "Plugin status: ", () => Settings.IsShutdown ? "Shutdown" : "Running" ),
-               new LabelViewModel( "Translator status: ", GetCurrentEndpointStatus ),
-               new LabelViewModel( "Running translations: ", () => $"{(TranslationManager.OngoingTranslations)}" ),
-               new LabelViewModel( "Served translations: ", () => $"{Settings.TranslationCount} / {Settings.MaxTranslationsBeforeShutdown}" ),
-               new LabelViewModel( "Queued translations: ", () => $"{(TranslationManager.UnstartedTranslations)} / {Settings.MaxUnstartedJobs}" ),
-               new LabelViewModel( "Error'ed translations: ", () => $"{TranslationManager.CurrentEndpoint?.ConsecutiveErrors ?? 0} / {Settings.MaxErrors}"  ),
+               new LabelViewModel( "版本: ", () => PluginData.Version ),
+               new LabelViewModel( "插件状态: ", () => Settings.IsShutdown ? "关闭" : "运行" ),
+               new LabelViewModel( "翻译状态: ", GetCurrentEndpointStatus ),
+               new LabelViewModel( "运行翻译: ", () => $"{(TranslationManager.OngoingTranslations)}" ),
+               new LabelViewModel( "提供翻译服务: ", () => $"{Settings.TranslationCount} / {Settings.MaxTranslationsBeforeShutdown}" ),
+               new LabelViewModel( "排队翻译: ", () => $"{(TranslationManager.UnstartedTranslations)} / {Settings.MaxUnstartedJobs}" ),
+               new LabelViewModel( "翻译错误: ", () => $"{TranslationManager.CurrentEndpoint?.ConsecutiveErrors ?? 0} / {Settings.MaxErrors}"  ),
             } );
       }
 
@@ -415,13 +415,13 @@ namespace XUnity.AutoTranslator.Plugin.Core
          var endpoint = TranslationManager.CurrentEndpoint;
          if( endpoint == null )
          {
-            return "Not selected";
+            return "未选择";
          }
          else if( endpoint.HasFailedDueToConsecutiveErrors )
          {
-            return "Shutdown";
+            return "关闭";
          }
-         return "Running";
+         return "运行";
       }
 
       private void ValidateConfiguration()
@@ -434,11 +434,11 @@ namespace XUnity.AutoTranslator.Plugin.Core
                var available = GetSupportedFonts();
                if( available == null )
                {
-                  XuaLogger.AutoTranslator.Warn( $"Unable to validate OverrideFont validity due to shimmed APIs." );
+                  XuaLogger.AutoTranslator.Warn( $"由于填隙API，无法验证覆盖字体的有效性." );
                }
                else if( !available.Contains( Settings.OverrideFont ) )
                {
-                  XuaLogger.AutoTranslator.Error( $"The specified override font is not available. Available fonts: " + string.Join( ", ", available ) );
+                  XuaLogger.AutoTranslator.Error( $"指定的替代字体不可用。可用字体: " + string.Join( ", ", available ) );
                   Settings.OverrideFont = null;
                }
                else
@@ -447,8 +447,8 @@ namespace XUnity.AutoTranslator.Plugin.Core
                }
             }
 
-            // Fonts & Materials/ARIAL SDF
-            // Fonts & Materials/LiberationSans SDF
+            // 字体和材质/ARIAL SDF
+            // 字体和材质/解放无SDF
             if( !string.IsNullOrEmpty( Settings.OverrideFontTextMeshPro ) )
             {
                _hasValidOverrideFont = true;
@@ -458,7 +458,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
          }
          catch( Exception e )
          {
-            XuaLogger.AutoTranslator.Error( e, "An error occurred while checking supported fonts." );
+            XuaLogger.AutoTranslator.Error( e, "检查支持的字体时出错." );
          }
       }
 
@@ -470,7 +470,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
          }
          catch( Exception e )
          {
-            XuaLogger.AutoTranslator.Error( e, "Unable to retrieve OS installed fonts." );
+            XuaLogger.AutoTranslator.Error( e, "无法检索操作系统安装的字体." );
             return null;
          }
       }
@@ -494,13 +494,13 @@ namespace XUnity.AutoTranslator.Plugin.Core
 
                if( TranslationManager.CurrentEndpoint == TranslationManager.FallbackEndpoint )
                {
-                  XuaLogger.AutoTranslator.Warn( "Cannot use same fallback endpoint as primary." );
+                  XuaLogger.AutoTranslator.Warn( "不能使用与主回退端点相同的回退端点." );
                }
             }
 
             Settings.SetEndpoint( TranslationManager.CurrentEndpoint?.Endpoint.Id );
 
-            XuaLogger.AutoTranslator.Info( $"Set translator endpoint to '{TranslationManager.CurrentEndpoint?.Endpoint.Id}'." );
+            XuaLogger.AutoTranslator.Info( $"将转换器端点设置为 '{TranslationManager.CurrentEndpoint?.Endpoint.Id}'." );
          }
       }
 
@@ -512,11 +512,11 @@ namespace XUnity.AutoTranslator.Plugin.Core
 
             Settings.SetFallback( TranslationManager.FallbackEndpoint?.Endpoint.Id );
 
-            XuaLogger.AutoTranslator.Info( $"Set fallback endpoint to '{TranslationManager.FallbackEndpoint?.Endpoint.Id}'." );
+            XuaLogger.AutoTranslator.Info( $"将回退端点设置为 '{TranslationManager.FallbackEndpoint?.Endpoint.Id}'." );
 
             if( TranslationManager.CurrentEndpoint != null && TranslationManager.CurrentEndpoint == TranslationManager.FallbackEndpoint )
             {
-               XuaLogger.AutoTranslator.Warn( "Cannot use same fallback endpoint as primary." );
+               XuaLogger.AutoTranslator.Warn( "不能使用与主回退端点相同的回退端点." );
             }
          }
       }
@@ -525,7 +525,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
       {
          try
          {
-            XuaLogger.AutoTranslator.Debug( "Probing whether OnLevelWasLoaded or SceneManager is supported in this version of Unity. Any warnings related to OnLevelWasLoaded coming from Unity can safely be ignored." );
+            XuaLogger.AutoTranslator.Debug( "探究此版本的Unity是否支持OnLevelWasLoaded或SceneManager。来自Unity的与OnLevelWasLoaded相关的任何警告都可以安全地忽略." );
             if( UnityFeatures.SupportsSceneManager )
             {
                TranslationScopeHelper.RegisterSceneLoadCallback( OnLevelWasLoadedFromSceneManager );
@@ -533,12 +533,12 @@ namespace XUnity.AutoTranslator.Plugin.Core
             }
             else
             {
-               XuaLogger.AutoTranslator.Debug( "SceneManager is not supported in this version of Unity. Falling back to OnLevelWasLoaded and Application level API." );
+               XuaLogger.AutoTranslator.Debug( "此版本的Unity不支持场景管理器。已加载回退到OnLevel和应用程序级API." );
             }
          }
          catch( Exception e )
          {
-            XuaLogger.AutoTranslator.Error( e, "An error occurred while settings up scene-load scans." );
+            XuaLogger.AutoTranslator.Error( e, "设置场景加载扫描时出错." );
          }
       }
 
@@ -561,19 +561,19 @@ namespace XUnity.AutoTranslator.Plugin.Core
          {
             if( Settings.EnableTextureScanOnSceneLoad && ( Settings.EnableTextureDumping || Settings.EnableTextureTranslation ) )
             {
-               XuaLogger.AutoTranslator.Info( "Performing texture lookup during scene load..." );
+               XuaLogger.AutoTranslator.Info( "在场景加载过程中执行纹理查找..." );
                var startTime = Time.realtimeSinceStartup;
 
                ManualHookForTextures();
 
                var endTime = Time.realtimeSinceStartup;
-               XuaLogger.AutoTranslator.Info( $"Finished texture lookup (took {Math.Round( endTime - startTime, 2 )} seconds)" );
+               XuaLogger.AutoTranslator.Info( $"已完成纹理查找 (took {Math.Round( endTime - startTime, 2 )} seconds)" );
             }
          }
       }
 
       /// <summary>
-      /// Loads the translations found in Translation.{lang}.txt
+      /// 加载“翻译”中找到的翻译.{lang}.txt
       /// </summary>
       private void LoadTranslations( bool reload )
       {
@@ -585,7 +585,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
          if( reload )
          {
             var dict = new Dictionary<string, DirectoryInfo>( StringComparer.OrdinalIgnoreCase );
-            var path = Path.Combine( Settings.TranslationsPath, "plugins" );
+            var path = Path.Combine( Settings.TranslationsPath, "插件" );
             var directory = new DirectoryInfo( path );
             if( directory.Exists )
             {
@@ -692,7 +692,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
                   var end = Time.realtimeSinceStartup;
                   var delta = Math.Round( end - start, 2 );
 
-                  XuaLogger.AutoTranslator.Debug( $"Update SpriteRenderers caused by {_requireSpriteRendererCheckCausedBy} component (took " + delta + " seconds)" );
+                  XuaLogger.AutoTranslator.Debug( $"更新由以下原因引起的Sprite渲染器 {_requireSpriteRendererCheckCausedBy} 组成部分 (took " + delta + " seconds)" );
                }
                finally
                {
@@ -740,7 +740,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
                }
                catch( Exception e )
                {
-                  XuaLogger.AutoTranslator.Warn( e, "An unexpected error occurred." );
+                  XuaLogger.AutoTranslator.Warn( e, "发生意外错误." );
                }
                finally
                {
@@ -780,7 +780,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
             }
             catch( Exception e )
             {
-               XuaLogger.AutoTranslator.Warn( e, "An unexpected error occurred." );
+               XuaLogger.AutoTranslator.Warn( e, "发生意外错误." );
             }
             finally
             {
@@ -863,7 +863,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
          }
          catch( Exception e )
          {
-            XuaLogger.AutoTranslator.Warn( e, "An error occurred while handling the UI discovery." );
+            XuaLogger.AutoTranslator.Warn( e, "处理UI发现时出错." );
          }
 
          return false;
@@ -895,7 +895,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
       }
 
       /// <summary>
-      /// Sets the text of a UI  text, while ensuring this will not fire a text changed event.
+      /// 设置UI文本的文本，同时确保这不会引发文本更改事件.
       /// </summary>
       private void SetText( object ui, string text, bool isTranslated, string originalText, TextTranslationInfo info )
       {
@@ -916,9 +916,9 @@ namespace XUnity.AutoTranslator.Plugin.Core
                   if( path != null )
                   {
                      var scope = TranslationScopeHelper.GetScope( ui );
-                     XuaLogger.AutoTranslator.Info( $"Setting text on '{ui.GetType().FullName}' to '{text}'" );
-                     XuaLogger.AutoTranslator.Info( "Path : " + path );
-                     XuaLogger.AutoTranslator.Info( "Level: " + scope );
+                     XuaLogger.AutoTranslator.Info( $"打开文本设置 '{ui.GetType().FullName}' to '{text}'" );
+                     XuaLogger.AutoTranslator.Info( "路径 : " + path );
+                     XuaLogger.AutoTranslator.Info( "数量: " + scope );
                   }
                }
 
@@ -934,7 +934,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
                   }
                }
 
-               // NGUI only behaves if you set the text after the resize behaviour
+               // NGUI仅在调整大小行为后设置文本时才起作用
                ui.SetText( text, info );
 
                info?.ResetScrollIn( ui );
@@ -962,7 +962,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
             }
             catch( Exception e )
             {
-               XuaLogger.AutoTranslator.Error( e, "An error occurred while setting text on a component." );
+               XuaLogger.AutoTranslator.Error( e, "在组件上设置文本时出错." );
             }
             finally
             {

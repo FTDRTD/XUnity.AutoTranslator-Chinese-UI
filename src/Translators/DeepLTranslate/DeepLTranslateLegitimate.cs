@@ -20,15 +20,15 @@ namespace DeepLTranslate
          "auto", "ar", "bg", "cs", "da", "de", "el", "en", "en-gb", "en-us","es", "et", "fi", "fr", "hu", "id", "it", "ja", "ko", "lt", "lv", "nb", "nl", "pl", "pt", "pt-br", "pt-pt", "ro", "ru", "sk", "sl", "sv", "tr", "uk", "zh", "zh-hans", "zh-hant"
       };
 
-      public override string Id => "DeepLTranslateLegitimate";
+      public override string Id => "DeepL翻译合法";
 
-      public override string FriendlyName => "DeepL Translator (Authenticated)";
+      public override string FriendlyName => "DeepL 翻译器 (已验证)";
 
       public override int MaxConcurrency => 1;
 
       public override int MaxTranslationsPerRequest => 25;
 
-      protected override string ConfigurationSectionName => "DeepLLegitimate";
+      protected override string ConfigurationSectionName => "深度合法化";
 
       private string FixLanguage( string lang )
       {

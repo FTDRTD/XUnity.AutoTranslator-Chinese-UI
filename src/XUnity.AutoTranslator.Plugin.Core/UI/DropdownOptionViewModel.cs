@@ -82,15 +82,15 @@ namespace XUnity.AutoTranslator.Plugin.Core.UI
       {
          if( fallback )
          {
-            _selected = GUIUtil.CreateContent( selection.Endpoint.FriendlyName, $"<b>CURRENT FALLBACK TRANSLATOR</b>\n{selection.Endpoint.FriendlyName} is the currently selected fallback translator that will be used to perform translations when the primary translator fails." );
-            _disabled = GUIUtil.CreateContent( selection.Endpoint.FriendlyName, $"<b>CANNOT SELECT FALLBACK TRANSLATOR</b>\n{selection.Endpoint.FriendlyName} cannot be selected because the initialization failed. {selection.Error?.Message}" );
-            _normal = GUIUtil.CreateContent( selection.Endpoint.FriendlyName, $"<b>SELECT FALLBACK TRANSLATOR</b>\n{selection.Endpoint.FriendlyName} will be selected as fallback translator." );
+            _selected = GUIUtil.CreateContent( selection.Endpoint.FriendlyName, $"<b>当前回退翻译器</b>\n{selection.Endpoint.FriendlyName} 是当前选定的回退翻译器，当主翻译器发生故障时，将用于执行翻译." );
+            _disabled = GUIUtil.CreateContent( selection.Endpoint.FriendlyName, $"<b>无法选择回退转换器</b>\n{selection.Endpoint.FriendlyName} 无法选择，因为初始化失败. {selection.Error?.Message}" );
+            _normal = GUIUtil.CreateContent( selection.Endpoint.FriendlyName, $"<b>选择回退转换器</b>\n{selection.Endpoint.FriendlyName} 将被选为后备翻译器." );
          }
          else
          {
-            _selected = GUIUtil.CreateContent( selection.Endpoint.FriendlyName, $"<b>CURRENT TRANSLATOR</b>\n{selection.Endpoint.FriendlyName} is the currently selected translator that will be used to perform translations." );
-            _disabled = GUIUtil.CreateContent( selection.Endpoint.FriendlyName, $"<b>CANNOT SELECT TRANSLATOR</b>\n{selection.Endpoint.FriendlyName} cannot be selected because the initialization failed. {selection.Error?.Message}" );
-            _normal = GUIUtil.CreateContent( selection.Endpoint.FriendlyName, $"<b>SELECT TRANSLATOR</b>\n{selection.Endpoint.FriendlyName} will be selected as translator." );
+            _selected = GUIUtil.CreateContent( selection.Endpoint.FriendlyName, $"<b>当前翻译器</b>\n{selection.Endpoint.FriendlyName} 是当前选择的将用于执行翻译的翻译器." );
+            _disabled = GUIUtil.CreateContent( selection.Endpoint.FriendlyName, $"<b>无法选择翻译器</b>\n{selection.Endpoint.FriendlyName} 无法选择，因为初始化失败. {selection.Error?.Message}" );
+            _normal = GUIUtil.CreateContent( selection.Endpoint.FriendlyName, $"<b>选择翻译器</b>\n{selection.Endpoint.FriendlyName} 将被选为翻译." );
          }
       }
 

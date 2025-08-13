@@ -29,7 +29,7 @@ namespace GoogleTranslateCompat
 
       public override string Id => "GoogleTranslateCompat";
 
-      public override string FriendlyName => "Google! Translate (Compat)";
+      public override string FriendlyName => "谷歌翻译 (Compat)";
 
       public override int MaxConcurrency => 1;
 

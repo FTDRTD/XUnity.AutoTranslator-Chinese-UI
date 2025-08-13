@@ -63,9 +63,9 @@ namespace GoogleTranslate
          _cookieContainer = new CookieContainer();
       }
 
-      public override string Id => "GoogleTranslate";
+      public override string Id => "谷歌翻译";
 
-      public override string FriendlyName => "Google! Translate";
+      public override string FriendlyName => "谷歌翻译";
 
       public override int MaxTranslationsPerRequest => _translationsPerRequest;
 
@@ -103,7 +103,7 @@ namespace GoogleTranslate
             _httpsServicePointTranslateTemplateUrl = _selectedApiBackend + HttpsServicePointTranslateTemplateUrl;
             _httpsServicePointRomanizeTemplateUrl = _selectedApiBackend + HttpsServicePointRomanizeTemplateUrl;
 
-            XuaLogger.AutoTranslator.Info( "The default backend for google translate was overwritten." );
+            XuaLogger.AutoTranslator.Info( "谷歌翻译的默认后端已被覆盖." );
          }
          else
          {

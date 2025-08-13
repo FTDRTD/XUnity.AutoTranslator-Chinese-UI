@@ -88,9 +88,9 @@ namespace BaiduTranslate
       private float _delay;
       private float _lastRequestTimestamp;
 
-      public override string Id => "BaiduTranslate";
+      public override string Id => "百度翻译";
 
-      public override string FriendlyName => "Baidu Translator";
+      public override string FriendlyName => "百度翻译";
 
       private string FixLanguage( string lang )
       {
@@ -106,13 +106,13 @@ namespace BaiduTranslate
          _appId = context.GetOrCreateSetting( "Baidu", "BaiduAppId", "" );
          _appSecret = context.GetOrCreateSetting( "Baidu", "BaiduAppSecret", "" );
          _delay = context.GetOrCreateSetting( "Baidu", "DelaySeconds", 1.0f );
-         if( string.IsNullOrEmpty( _appId ) ) throw new EndpointInitializationException( "The BaiduTranslate endpoint requires an App Id which has not been provided." );
-         if( string.IsNullOrEmpty( _appSecret ) ) throw new EndpointInitializationException( "The BaiduTranslate endpoint requires an App Secret which has not been provided." );
+         if( string.IsNullOrEmpty( _appId ) ) throw new EndpointInitializationException( "百度翻译端点需要一个尚未提供的应用程序Id." );
+         if( string.IsNullOrEmpty( _appSecret ) ) throw new EndpointInitializationException( "百度翻译端点需要一个尚未提供的应用程序密钥." );
 
          context.DisableCertificateChecksFor( "api.fanyi.baidu.com" );
 
-         if( !SupportedLanguages.ContainsKey( context.SourceLanguage ) ) throw new EndpointInitializationException( $"The source language '{context.SourceLanguage}' is not supported." );
-         if( !SupportedLanguages.ContainsKey( context.DestinationLanguage ) ) throw new EndpointInitializationException( $"The destination language '{context.DestinationLanguage}' is not supported." );
+         if( !SupportedLanguages.ContainsKey( context.SourceLanguage ) ) throw new EndpointInitializationException( $"源语言 '{context.SourceLanguage}' is not supported." );
+         if( !SupportedLanguages.ContainsKey( context.DestinationLanguage ) ) throw new EndpointInitializationException( $"目标语言 '{context.DestinationLanguage}' is not supported." );
       }
 
       public override IEnumerator OnBeforeTranslate( IHttpTranslationContext context )
