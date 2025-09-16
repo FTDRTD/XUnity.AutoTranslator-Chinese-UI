@@ -22,45 +22,87 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup Unity
-      uses: game-ci/unity-builder@v4
-      with:
-        unityVersion: 2021.3.16f1
-        targetPlatform: Windows
-
-    - name: Install dependencies
-      run: |
-        # Install any required tools for asset bundle creation
-        dotnet tool install -g UnityPackageTool
-
-    - name: Build TMP Font Asset Bundle
+    - name: Prepare TMP Font Assets
       run: |
         $assetVersion = "${{ github.event.inputs.asset_version || '2025-05-12' }}"
         $outputPath = "dist/TMP_Font_AssetBundles_${assetVersion}.7z"
+        $tempAssetsPath = "temp_assets"
 
-        # Create output directory
+        # Create output and temp directories
         New-Item -ItemType Directory -Force -Path "dist"
-
-        # Build asset bundle using Unity
-        # This would typically involve Unity command line build
-        # For now, create a placeholder
-        New-Item -ItemType Directory -Force -Path "temp_assets"
+        New-Item -ItemType Directory -Force -Path $tempAssetsPath
 
         # Copy TMP assets to temp directory
         if (Test-Path "libs/TextMesh Pro") {
-          Copy-Item "libs/TextMesh Pro/*" "temp_assets/" -Recurse -ErrorAction SilentlyContinue
+          Copy-Item "libs/TextMesh Pro/*" $tempAssetsPath -Recurse -ErrorAction SilentlyContinue
+          Write-Host "Copied TMP assets to temp directory"
+        } else {
+          Write-Host "TextMesh Pro directory not found, creating placeholder"
+          # Create a placeholder structure if TMP assets don't exist
+          New-Item -ItemType Directory -Force -Path "$tempAssetsPath/Fonts"
+          New-Item -ItemType Directory -Force -Path "$tempAssetsPath/Resources"
+          "# TMP Font Assets Placeholder`nThis file contains placeholder content for TextMesh Pro font assets.`nPlease replace with actual TMP font files." | Out-File -FilePath "$tempAssetsPath/README.txt"
         }
 
-        # Create asset bundle (placeholder - would need Unity build process)
-        # In a real scenario, you'd use Unity's command line to build asset bundles
-        Write-Host "Building TMP Font Asset Bundle..."
+        # Copy any additional font-related files from the project
+        Get-ChildItem -Path "src" -Recurse -Include "*.ttf","*.otf","*.fontsettings" -ErrorAction SilentlyContinue | ForEach-Object {
+          Copy-Item $_.FullName $tempAssetsPath -ErrorAction SilentlyContinue
+        }
 
-        # Compress to 7z format
+        # Create manifest file
+        $manifest = @"
+TMP Font Asset Bundle - Version ${assetVersion}
+Created: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+Contents: TextMesh Pro font assets and resources
+
+Installation:
+1. Extract this archive
+2. Copy contents to your Unity project's Assets folder
+3. Import TextMesh Pro package if not already installed
+
+Note: This bundle contains placeholder content if no TMP assets were found in the libs directory.
+"@
+        $manifest | Out-File -FilePath "$tempAssetsPath/manifest.txt"
+
+        # List contents for verification
+        Write-Host "Contents of temp_assets directory:"
+        Get-ChildItem -Path $tempAssetsPath -Recurse | ForEach-Object {
+          Write-Host "  $($_.FullName.Replace((Get-Location).Path + '\', ''))"
+        }
+
+    - name: Create 7z Archive
+      run: |
+        $assetVersion = "${{ github.event.inputs.asset_version || '2025-05-12' }}"
+        $outputPath = "dist/TMP_Font_AssetBundles_${assetVersion}.7z"
+        $tempAssetsPath = "temp_assets"
+
+        # Try to use 7z if available, otherwise use built-in compression
         if (Get-Command "7z" -ErrorAction SilentlyContinue) {
-          & 7z a $outputPath temp_assets/*
+          Write-Host "Using 7z for compression..."
+          & 7z a $outputPath "$tempAssetsPath/*"
         } else {
-          # Fallback to Compress-Archive if 7z not available
-          Compress-Archive -Path "temp_assets/*" -DestinationPath $outputPath -Force
+          Write-Host "7z not found, using PowerShell compression..."
+          # Convert to zip format as fallback (since 7z is not available)
+          $zipPath = $outputPath.Replace('.7z', '.zip')
+          Compress-Archive -Path "$tempAssetsPath/*" -DestinationPath $zipPath -Force
+
+          # Rename to 7z for consistency (optional)
+          Move-Item $zipPath $outputPath -Force
+        }
+
+        # Verify archive was created
+        if (Test-Path $outputPath) {
+          $fileSize = (Get-Item $outputPath).Length
+          Write-Host "Archive created successfully: $outputPath (Size: $([math]::Round($fileSize/1MB, 2)) MB)"
+        } else {
+          Write-Error "Failed to create archive"
+          exit 1
+        }
+
+    - name: Clean up temp files
+      run: |
+        if (Test-Path "temp_assets") {
+          Remove-Item "temp_assets" -Recurse -Force
         }
 
     - name: Upload font asset artifact
@@ -68,6 +110,7 @@ jobs:
       with:
         name: TMP_Font_AssetBundles-${{ github.event.inputs.asset_version || '2025-05-12' }}
         path: dist/TMP_Font_AssetBundles_${{ github.event.inputs.asset_version || '2025-05-12' }}.7z
+        retention-days: 30
 
   release-font-assets:
     needs: build-font-assets
@@ -94,11 +137,24 @@ jobs:
           TMP (TextMesh Pro) Font Asset Bundles
 
           **Version:** ${{ github.event.inputs.asset_version }}
+          **Created:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
 
           This release contains TextMesh Pro font asset bundles for Unity projects.
 
+          ## Contents
+          - TextMesh Pro font files (.ttf, .otf)
+          - Font settings and configurations
+          - Font resources and materials
+
           ## Installation
-          Extract the .7z file and copy the contents to your Unity project's Assets folder.
+          1. Extract the .7z file
+          2. Copy the contents to your Unity project's Assets folder
+          3. Import TextMesh Pro package if not already installed
+          4. Configure fonts in your TextMesh Pro settings
+
+          ## Notes
+          - If no TMP assets were found during build, this bundle contains placeholder content
+          - Please ensure you have the required TMP assets in the `libs/TextMesh Pro/` directory for future builds
         draft: true
         prerelease: false
       env:
