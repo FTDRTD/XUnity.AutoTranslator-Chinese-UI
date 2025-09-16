@@ -56,7 +56,7 @@ jobs:
             output-name: XUnity.AutoTranslator-UnityInjector
             config: Release
           - project: XUnity.AutoTranslator.Setup
-            target: net35
+            target: net40
             output-name: XUnity.AutoTranslator-ReiPatcher
             config: Release
 
@@ -96,18 +96,6 @@ jobs:
     - name: Build project
       run: |
         $targetFramework = "${{ matrix.target }}"
-        if ("${{ matrix.project }}" -eq "XUnity.AutoTranslator.Plugin.BepInEx-IL2CPP") {
-          $targetFramework = "net6.0"
-        }
-        elseif ("${{ matrix.project }}" -eq "XUnity.AutoTranslator.Plugin.Core" -and "${{ matrix.output-name }}" -match "IL2CPP") {
-          $targetFramework = "net6.0"
-        }
-        elseif ("${{ matrix.project }}" -eq "XUnity.AutoTranslator.Plugin.Core") {
-          $targetFramework = "net35"
-        }
-        else {
-          $targetFramework = "net35"
-        }
 
         dotnet build src/${{ matrix.project }}/${{ matrix.project }}.csproj `
           --configuration ${{ matrix.config }} `
