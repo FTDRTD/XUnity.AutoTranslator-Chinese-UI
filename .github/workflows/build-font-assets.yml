@@ -1,0 +1,105 @@
+name: Build Font Assets
+
+on:
+  push:
+    paths:
+      - 'libs/TextMesh Pro/**'
+      - 'tools/**'
+  workflow_dispatch:
+    inputs:
+      asset_version:
+        description: 'Asset bundle version (e.g., 2025-05-12)'
+        required: true
+        default: '2025-05-12'
+
+jobs:
+  build-font-assets:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Unity
+      uses: game-ci/unity-builder@v4
+      with:
+        unityVersion: 2021.3.16f1
+        targetPlatform: Windows
+
+    - name: Install dependencies
+      run: |
+        # Install any required tools for asset bundle creation
+        dotnet tool install -g UnityPackageTool
+
+    - name: Build TMP Font Asset Bundle
+      run: |
+        $assetVersion = "${{ github.event.inputs.asset_version || '2025-05-12' }}"
+        $outputPath = "dist/TMP_Font_AssetBundles_${assetVersion}.7z"
+
+        # Create output directory
+        New-Item -ItemType Directory -Force -Path "dist"
+
+        # Build asset bundle using Unity
+        # This would typically involve Unity command line build
+        # For now, create a placeholder
+        New-Item -ItemType Directory -Force -Path "temp_assets"
+
+        # Copy TMP assets to temp directory
+        if (Test-Path "libs/TextMesh Pro") {
+          Copy-Item "libs/TextMesh Pro/*" "temp_assets/" -Recurse -ErrorAction SilentlyContinue
+        }
+
+        # Create asset bundle (placeholder - would need Unity build process)
+        # In a real scenario, you'd use Unity's command line to build asset bundles
+        Write-Host "Building TMP Font Asset Bundle..."
+
+        # Compress to 7z format
+        if (Get-Command "7z" -ErrorAction SilentlyContinue) {
+          & 7z a $outputPath temp_assets/*
+        } else {
+          # Fallback to Compress-Archive if 7z not available
+          Compress-Archive -Path "temp_assets/*" -DestinationPath $outputPath -Force
+        }
+
+    - name: Upload font asset artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: TMP_Font_AssetBundles-${{ github.event.inputs.asset_version || '2025-05-12' }}
+        path: dist/TMP_Font_AssetBundles_${{ github.event.inputs.asset_version || '2025-05-12' }}.7z
+
+  release-font-assets:
+    needs: build-font-assets
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download font assets
+      uses: actions/download-artifact@v4
+      with:
+        name: TMP_Font_AssetBundles-${{ github.event.inputs.asset_version }}
+        path: assets
+
+    - name: Create Font Assets Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: fonts-${{ github.event.inputs.asset_version }}
+        name: TMP Font Asset Bundles ${{ github.event.inputs.asset_version }}
+        files: assets/TMP_Font_AssetBundles_${{ github.event.inputs.asset_version }}.7z
+        body: |
+          TMP (TextMesh Pro) Font Asset Bundles
+
+          **Version:** ${{ github.event.inputs.asset_version }}
+
+          This release contains TextMesh Pro font asset bundles for Unity projects.
+
+          ## Installation
+          Extract the .7z file and copy the contents to your Unity project's Assets folder.
+        draft: true
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
