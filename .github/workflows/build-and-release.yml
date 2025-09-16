@@ -51,10 +51,6 @@ jobs:
             target: net35
             output-name: XUnity.AutoTranslator-MelonMod
             config: Release
-          - project: XUnity.AutoTranslator.Plugin.MelonMod-IL2CPP
-            target: net6.0
-            output-name: XUnity.AutoTranslator-MelonMod-IL2CPP
-            config: Release
           - project: XUnity.AutoTranslator.Plugin.UnityInjector
             target: net35
             output-name: XUnity.AutoTranslator-UnityInjector
@@ -86,7 +82,7 @@ jobs:
     - name: Build project
       run: |
         $targetFramework = "${{ matrix.target }}"
-        if ("${{ matrix.project }}" -eq "XUnity.AutoTranslator.Plugin.BepInEx-IL2CPP" -or "${{ matrix.project }}" -eq "XUnity.AutoTranslator.Plugin.MelonMod-IL2CPP") {
+        if ("${{ matrix.project }}" -eq "XUnity.AutoTranslator.Plugin.BepInEx-IL2CPP") {
           $targetFramework = "net6.0"
         }
         elseif ("${{ matrix.project }}" -eq "XUnity.AutoTranslator.Plugin.Core" -and "${{ matrix.output-name }}" -match "IL2CPP") {
