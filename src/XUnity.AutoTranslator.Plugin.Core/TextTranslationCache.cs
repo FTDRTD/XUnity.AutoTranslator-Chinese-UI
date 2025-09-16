@@ -780,7 +780,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
 
       private void LoadStaticTranslations()
       {
-         if( Settings.UseStaticTranslations && Settings.FromLanguage == Settings.DefaultFromLanguage && Settings.Language == Settings.DefaultLanguage )
+         if( Settings.UseStaticTranslations )
          {
             // load static translations from previous titles
             string[] translations = Properties.Resources.StaticTranslations.Split( new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries );
@@ -798,6 +798,8 @@ namespace XUnity.AutoTranslator.Plugin.Core
                   }
                }
             }
+
+            if( !Settings.EnableSilentMode ) XuaLogger.AutoTranslator.Info( $"Loaded {_staticTranslations.Count} static translations for any language combination." );
          }
       }
 

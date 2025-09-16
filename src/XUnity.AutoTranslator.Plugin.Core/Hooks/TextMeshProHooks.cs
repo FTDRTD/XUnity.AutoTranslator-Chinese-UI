@@ -27,10 +27,6 @@ namespace XUnity.AutoTranslator.Plugin.Core.Hooks.TextMeshPro
          typeof( TMP_Text_SetText_Hook2 ),
          typeof( TMP_Text_SetText_Hook3 ),
 
-         typeof( TMP_Text_SetCharArray_Hook1 ),
-         typeof( TMP_Text_SetCharArray_Hook2 ),
-         typeof( TMP_Text_SetCharArray_Hook3 ),
-
 #if MANAGED
          typeof( TextWindow_SetText_Hook ),
          typeof( TeshMeshProUGUI_text_Hook ),
@@ -253,123 +249,6 @@ namespace XUnity.AutoTranslator.Plugin.Core.Hooks.TextMeshPro
       static void MM_Detour( Component __instance, string value, float arg2, float arg3, float arg4 )
       {
          _original( __instance, value, arg2, arg3, arg4 );
-
-         Postfix( __instance );
-      }
-#endif
-   }
-
-   [HookingHelperPriority( HookPriority.Last )]
-   internal static class TMP_Text_SetCharArray_Hook1
-   {
-      static bool Prepare( object instance )
-      {
-         return UnityTypes.TMP_Text != null;
-      }
-
-      static MethodBase TargetMethod( object instance )
-      {
-#if MANAGED
-         return AccessToolsShim.Method( UnityTypes.TMP_Text?.ClrType, "SetCharArray", new[] { typeof( char[] ) } );
-#else
-         return AccessToolsShim.Method( UnityTypes.TMP_Text?.ClrType, "SetCharArray", new[] { typeof( Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<char> ) } );
-#endif
-      }
-
-      static void Postfix( Component __instance )
-      {
-         AutoTranslationPlugin.Current.Hook_TextChanged( __instance, false );
-      }
-
-#if MANAGED
-      static Action<Component, char[]> _original;
-
-      static void MM_Init( object detour )
-      {
-         _original = detour.GenerateTrampolineEx<Action<Component, char[]>>();
-      }
-
-      static void MM_Detour( Component __instance, char[] value )
-      {
-         _original( __instance, value );
-
-         Postfix( __instance );
-      }
-#endif
-   }
-
-   [HookingHelperPriority( HookPriority.Last )]
-   internal static class TMP_Text_SetCharArray_Hook2
-   {
-      static bool Prepare( object instance )
-      {
-         return UnityTypes.TMP_Text != null;
-      }
-
-      static MethodBase TargetMethod( object instance )
-      {
-#if MANAGED
-         return AccessToolsShim.Method( UnityTypes.TMP_Text?.ClrType, "SetCharArray", new[] { typeof( char[] ), typeof( int ), typeof( int ) } );
-#else
-         return AccessToolsShim.Method( UnityTypes.TMP_Text?.ClrType, "SetCharArray", new[] { typeof( Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<char> ), typeof( int ), typeof( int ) } );
-#endif
-      }
-
-      static void Postfix( Component __instance )
-      {
-         AutoTranslationPlugin.Current.Hook_TextChanged( __instance, false );
-      }
-
-#if MANAGED
-      static Action<Component, char[], int, int> _original;
-
-      static void MM_Init( object detour )
-      {
-         _original = detour.GenerateTrampolineEx<Action<Component, char[], int, int>>();
-      }
-
-      static void MM_Detour( Component __instance, char[] value, int arg2, int arg3 )
-      {
-         _original( __instance, value, arg2, arg3 );
-
-         Postfix( __instance );
-      }
-#endif
-   }
-
-   [HookingHelperPriority( HookPriority.Last )]
-   internal static class TMP_Text_SetCharArray_Hook3
-   {
-      static bool Prepare( object instance )
-      {
-         return UnityTypes.TMP_Text != null;
-      }
-
-      static MethodBase TargetMethod( object instance )
-      {
-#if MANAGED
-         return AccessToolsShim.Method( UnityTypes.TMP_Text?.ClrType, "SetCharArray", new[] { typeof( int[] ), typeof( int ), typeof( int ) } );
-#else
-         return AccessToolsShim.Method( UnityTypes.TMP_Text?.ClrType, "SetCharArray", new[] { typeof( Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<int> ), typeof( int ), typeof( int ) } );
-#endif
-      }
-
-      static void Postfix( Component __instance )
-      {
-         AutoTranslationPlugin.Current.Hook_TextChanged( __instance, false );
-      }
-
-#if MANAGED
-      static Action<Component, int[], int, int> _original;
-
-      static void MM_Init( object detour )
-      {
-         _original = detour.GenerateTrampolineEx<Action<Component, int[], int, int>>();
-      }
-
-      static void MM_Detour( Component __instance, int[] value, int arg2, int arg3 )
-      {
-         _original( __instance, value, arg2, arg3 );
 
          Postfix( __instance );
       }
