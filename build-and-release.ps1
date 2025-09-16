@@ -22,16 +22,52 @@ param (
 
 # --- Script Configuration ---
 
-# This matrix defines all the different versions to be built. It mirrors the GitHub Actions workflow.
-# SYNTAX FIX: PowerShell hashtables use '=' instead of ':'
+# This matrix defines all the different versions to be built.
+# It has been reformatted to be more readable and prevent copy-paste errors.
+# FIX: Keys with hyphens like 'output-name' must be quoted.
 $buildMatrix = @(
-    @{ project = "XUnity.AutoTranslator.Plugin.BepInEx";         target = "net40"; output-name = "XUnity.AutoTranslator-BepInEx";         config = "Release" },
-    @{ project = "XUnity.AutoTranslator.Plugin.BepInEx-IL2CPP";  target = "net6.0";output-name = "XUnity.AutoTranslator-BepInEx-IL2CPP";config = "Release" },
-    @{ project = "XUnity.AutoTranslator.Plugin.Core";            target = "net35"; output-name = "XUnity.AutoTranslator-Developer";     config = "Release" },
-    @{ project = "XUnity.AutoTranslator.Plugin.Core";            target = "net6.0";output-name = "XUnity.AutoTranslator-Developer-IL2CPP"; config = "Release" },
-    @{ project = "XUnity.AutoTranslator.Plugin.IPA";             target = "net35"; output-name = "XUnity.AutoTranslator-IPA";         config = "Release" },
-    @{ project = "XUnity.AutoTranslator.Plugin.MelonMod";        target = "net35"; output-name = "XUnity.AutoTranslator-MelonMod";      config = "Release" },
-    @{ project = "XUnity.AutoTranslator.Plugin.UnityInjector";   target = "net35"; output-name = "XUnity.AutoTranslator-UnityInjector"; config = "Release" }
+    @{
+        project     = "XUnity.AutoTranslator.Plugin.BepInEx"
+        target      = "net40"
+        'output-name' = "XUnity.AutoTranslator-BepInEx"
+        config      = "Release"
+    },
+    @{
+        project     = "XUnity.AutoTranslator.Plugin.BepInEx-IL2CPP"
+        target      = "net6.0"
+        'output-name' = "XUnity.AutoTranslator-BepInEx-IL2CPP"
+        config      = "Release"
+    },
+    @{
+        project     = "XUnity.AutoTranslator.Plugin.Core"
+        target      = "net35"
+        'output-name' = "XUnity.AutoTranslator-Developer"
+        config      = "Release"
+    },
+    @{
+        project     = "XUnity.AutoTranslator.Plugin.Core"
+        target      = "net6.0"
+        'output-name' = "XUnity.AutoTranslator-Developer-IL2CPP"
+        config      = "Release"
+    },
+    @{
+        project     = "XUnity.AutoTranslator.Plugin.IPA"
+        target      = "net35"
+        'output-name' = "XUnity.AutoTranslator-IPA"
+        config      = "Release"
+    },
+    @{
+        project     = "XUnity.AutoTranslator.Plugin.MelonMod"
+        target      = "net35"
+        'output-name' = "XUnity.AutoTranslator-MelonMod"
+        config      = "Release"
+    },
+    @{
+        project     = "XUnity.AutoTranslator.Plugin.UnityInjector"
+        target      = "net35"
+        'output-name' = "XUnity.AutoTranslator-UnityInjector"
+        config      = "Release"
+    }
 )
 
 $SolutionFile = "XUnity.AutoTranslator.sln"
@@ -81,6 +117,7 @@ try {
 
     # 4. Package All Builds
     Write-SectionHeader "4. Packaging all builds..."
+    $allZipFiles = [System.Collections.Generic.List[string]]::new()
     foreach ($build in $buildMatrix) {
         $outputName = $build.'output-name'
         $projectName = $build.project
@@ -100,30 +137,18 @@ try {
         if ($outputName -match "BepInEx") {
             Write-Host "  Applying BepInEx packaging rules for $outputName..."
             
-            # Copy dependencies
-            Copy-Item "src\XUnity.Common\bin\Release\$targetFramework\XUnity.Common.dll" $outputDir
-            Copy-Item "src\XUnity.ResourceRedirector\bin\Release\$targetFramework\XUnity.ResourceRedirector.dll" $outputDir
-            Copy-Item "src\XUnity.AutoTranslator.Plugin.Core\bin\Release\$targetFramework\XUnity.AutoTranslator.Plugin.Core.dll" $outputDir
-            Copy-Item "src\XUnity.AutoTranslator.Plugin.ExtProtocol\bin\Release\net35\XUnity.AutoTranslator.Plugin.ExtProtocol.dll" $outputDir
-
-            # Create BepInEx directory structure
             $bepInExDir = Join-Path $outputDir "BepInEx"
             $null = New-Item -ItemType Directory -Path (Join-Path $bepInExDir "core") -Force
             $null = New-Item -ItemType Directory -Path (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator") -Force
             $null = New-Item -ItemType Directory -Path (Join-Path $bepInExDir "plugins\XUnity.ResourceRedirector") -Force
 
-            # Move files to their correct locations
-            Copy-Item "$outputDir\XUnity.Common.dll" (Join-Path $bepInExDir "core\")
-            Copy-Item "$outputDir\XUnity.ResourceRedirector.dll" (Join-Path $bepInExDir "plugins\XUnity.ResourceRedirector\")
-            # For the main plugin dir, copy everything except the two dlls we already moved.
-            Get-ChildItem "$outputDir\*.dll" -Exclude "XUnity.Common.dll", "XUnity.ResourceRedirector.dll" | Copy-Item -Destination (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
-            Copy-Item "$outputDir\*.pdb" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
+            Copy-Item "src\XUnity.Common\bin\Release\$targetFramework\XUnity.Common.dll" (Join-Path $bepInExDir "core\")
+            Copy-Item "src\XUnity.ResourceRedirector\bin\Release\$targetFramework\XUnity.ResourceRedirector.dll" (Join-Path $bepInExDir "plugins\XUnity.ResourceRedirector\")
+            Copy-Item "src\XUnity.AutoTranslator.Plugin.Core\bin\Release\$targetFramework\XUnity.AutoTranslator.Plugin.Core.dll" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
+            Copy-Item "src\XUnity.AutoTranslator.Plugin.ExtProtocol\bin\Release\net35\XUnity.AutoTranslator.Plugin.ExtProtocol.dll" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
+            Copy-Item "src\$projectName\bin\$config\$targetFramework\$projectName.dll" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
+            Copy-Item "src\$projectName\bin\$config\$targetFramework\$projectName.pdb" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\") -ErrorAction SilentlyContinue
             
-            # Now remove the dlls from the root of the output dir as they've been moved
-            Remove-Item "$outputDir\*.dll"
-            Remove-Item "$outputDir\*.pdb"
-
-            # Copy libs from the libs folder
             Copy-Item "libs\BepInEx 5.0\BepInEx.dll" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
             Copy-Item "libs\ExIni.dll" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
         }
@@ -132,29 +157,21 @@ try {
         $zipName = "$outputName-$Version.zip"
         $zipPath = Join-Path $DistDirectory $zipName
         
-        if ($outputName -match "BepInEx") {
-             # For BepInEx, the source for zipping is the BepInEx folder itself
-            $sourceDir = Join-Path $outputDir "BepInEx"
-            Compress-Archive -Path "$sourceDir\*" -DestinationPath $zipPath -Force
-        } else {
-            # For other types, zip the contents of the output directory
-            $sourceDir = "$outputDir\*"
-            Compress-Archive -Path $sourceDir -DestinationPath $zipPath -Force
-        }
-
+        Compress-Archive -Path "$outputDir\*" -DestinationPath $zipPath -Force
+        
         Write-Host "  Created ZIP package: $zipPath"
+        $allZipFiles.Add($zipPath)
     }
 
     # 5. Create GitHub Release
     Write-SectionHeader "5. Creating GitHub Release v$Version..."
-    $zipFiles = Get-ChildItem -Path $DistDirectory -Filter "*.zip" | ForEach-Object { $_.FullName }
     
-    if ($zipFiles.Count -eq 0) {
+    if ($allZipFiles.Count -eq 0) {
         throw "No ZIP files found to upload."
     }
 
     # Use GitHub CLI to create the release and upload files
-    gh release create "v$Version" --generate-notes --title "Release v$Version" $zipFiles
+    gh release create "v$Version" --generate-notes --title "Release v$Version" $allZipFiles
     
     if ($LASTEXITCODE -ne 0) { throw "GitHub release creation failed." }
 
