@@ -76,6 +76,10 @@ namespace XUnity.AutoTranslator.Plugin.Core.UI
 
       private void ShowDropdown( float x, float y, float width, GUIStyle buttonStyle )
       {
+#if IL2CPP
+         // IL2CPP环境下使用更安全的GUI方法，避免Method unstripping failed异常
+         ShowDropdownIL2CPP( x, y, width, buttonStyle );
+#else
          var rect = GUIUtil.R( x, y, width, _supportsScrollView && _viewModel.Options.Count * GUIUtil.RowHeight > MaxHeight ? MaxHeight : _viewModel.Options.Count * GUIUtil.RowHeight );
 
          GUILayout.BeginArea( rect, GUIUtil.NoSpacingBoxStyle );
@@ -116,6 +120,58 @@ namespace XUnity.AutoTranslator.Plugin.Core.UI
             GUILayout.EndScrollView();
          }
          GUILayout.EndArea();
+#endif
       }
+
+#if IL2CPP
+      private void ShowDropdownIL2CPP( float x, float y, float width, GUIStyle buttonStyle )
+      {
+         try
+         {
+            var options = _viewModel.Options;
+            int totalHeight = (options.Count + 1) * (int)GUIUtil.RowHeight; // +1 for unselect button
+            bool needsScroll = totalHeight > MaxHeight;
+
+            // Create a simple box background
+            GUI.Box( GUIUtil.R( x, y, width, needsScroll ? MaxHeight : totalHeight ), "", GUIUtil.NoSpacingBoxStyle );
+
+            float currentY = y + 2; // Small padding
+            var style = _viewModel.CurrentSelection == null ? GUIUtil.NoMarginButtonPressedStyle : GUIUtil.NoMarginButtonStyle;
+
+            // Unselect button
+            if( GUI.Button( GUIUtil.R( x + 2, currentY, width - 4, GUIUtil.RowHeight - 2 ), _unselect.text, style ) )
+            {
+               _viewModel.Select( null );
+               _isShown = false;
+            }
+            currentY += GUIUtil.RowHeight;
+
+            // Options
+            foreach( var option in options )
+            {
+               if( currentY + GUIUtil.RowHeight > y + MaxHeight && needsScroll )
+               {
+                  // Would need scrolling but we can't use GUILayout in IL2CPP, so just show what fits
+                  break;
+               }
+
+               style = option.IsSelected() ? GUIUtil.NoMarginButtonPressedStyle : GUIUtil.NoMarginButtonStyle;
+               GUI.enabled = option?.IsEnabled() ?? true;
+               if( GUI.Button( GUIUtil.R( x + 2, currentY, width - 4, GUIUtil.RowHeight - 2 ), option.Text.text, style ) )
+               {
+                  _viewModel.Select( option );
+                  _isShown = false;
+               }
+               GUI.enabled = true;
+               currentY += GUIUtil.RowHeight;
+            }
+         }
+         catch( Exception e )
+         {
+            XuaLogger.AutoTranslator.Warn( e, "Failed to show dropdown in IL2CPP mode. Hiding dropdown." );
+            _isShown = false;
+         }
+      }
+#endif
    }
 }

@@ -201,6 +201,10 @@ namespace XUnity.AutoTranslator.Plugin.Core.UI
 
       private void DrawTextArea( float posy, ScrollPositioned positioned, string title, IEnumerable<string> texts )
       {
+#if IL2CPP
+         // IL2CPP环境下使用更安全的GUI方法，避免Method unstripping failed异常
+         DrawTextAreaIL2CPP( posy, positioned, title, texts );
+#else
          GUI.Label( GUIUtil.R( GUIUtil.HalfComponentSpacing + 5, posy + 5, _viewModel.Width - GUIUtil.ComponentSpacing, GUIUtil.LabelHeight ), title );
 
          posy += GUIUtil.LabelHeight + GUIUtil.HalfComponentSpacing;
@@ -217,6 +221,37 @@ namespace XUnity.AutoTranslator.Plugin.Core.UI
 
          GUILayout.EndScrollView();
          GUILayout.EndArea();
+#endif
       }
+
+#if IL2CPP
+      private void DrawTextAreaIL2CPP( float posy, ScrollPositioned positioned, string title, IEnumerable<string> texts )
+      {
+         try
+         {
+            GUI.Label( GUIUtil.R( GUIUtil.HalfComponentSpacing + 5, posy + 5, _viewModel.Width - GUIUtil.ComponentSpacing, GUIUtil.LabelHeight ), title );
+
+            posy += GUIUtil.LabelHeight + GUIUtil.HalfComponentSpacing;
+
+            float boxWidth = _viewModel.Width - GUIUtil.ComponentSpacing;
+            float boxHeight = _viewModel.Height - GUIUtil.LabelHeight;
+
+            // Create scrollable area using GUI methods instead of GUILayout
+            GUI.Box( GUIUtil.R( GUIUtil.HalfComponentSpacing, posy, boxWidth, boxHeight ), "", GUI.skin.box );
+
+            var textList = texts.ToList();
+            if( textList.Count > 0 )
+            {
+               // Simple text display without scrolling for IL2CPP compatibility
+               string combinedText = string.Join( "\n", textList );
+               GUI.Label( GUIUtil.R( GUIUtil.HalfComponentSpacing + 5, posy + 5, boxWidth - 10, boxHeight - 10 ), combinedText, GUIUtil.LabelTranslation );
+            }
+         }
+         catch( Exception e )
+         {
+            XuaLogger.AutoTranslator.Warn( e, "Failed to draw text area in IL2CPP mode." );
+         }
+      }
+#endif
    }
 }
