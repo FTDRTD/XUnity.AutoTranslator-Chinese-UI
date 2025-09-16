@@ -195,7 +195,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
          {
             if( !string.IsNullOrEmpty( Settings.FallbackFontTextMeshPro ) )
             {
-               var font = FontCache.GetOrCreateFallbackFontTextMeshPro();
+               var font = XUnity.AutoTranslator.Plugin.Core.Fonts.FontCache.GetOrCreateFallbackFontTextMeshPro();
                if( UnityTypes.TMP_Settings_Properties.FallbackFontAssets == null )
                {
                   XuaLogger.AutoTranslator.Info( $"无法使用回退字体，因为此版本不支持它." );
@@ -466,7 +466,7 @@ namespace XUnity.AutoTranslator.Plugin.Core
       {
          try
          {
-            return FontHelper.GetOSInstalledFontNames();
+            return XUnity.AutoTranslator.Plugin.Core.Fonts.FontHelper.GetOSInstalledFontNames();
          }
          catch( Exception e )
          {

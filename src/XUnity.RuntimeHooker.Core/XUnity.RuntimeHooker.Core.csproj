@@ -5,4 +5,8 @@
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
    </PropertyGroup>
 
+   <ItemGroup>
+      <ProjectReference Include="..\XUnity.Common\XUnity.Common.csproj" />
+   </ItemGroup>
+
 </Project>

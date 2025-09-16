@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net35</TargetFramework>
+		<TargetFramework>net40</TargetFramework>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\UnityEngine\UnityEngine.csproj" />
 		<ProjectReference Include="..\XUnity.AutoTranslator.Plugin.Core\XUnity.AutoTranslator.Plugin.Core.csproj" />
+		<ProjectReference Include="..\XUnity.Common\XUnity.Common.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

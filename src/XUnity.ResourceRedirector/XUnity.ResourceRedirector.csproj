@@ -22,6 +22,7 @@
 
 	<PropertyGroup Condition="'$(TargetFramework)'=='net35'">
 		<DefineConstants>MANAGED</DefineConstants>
+		<EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(TargetFramework)'=='net6.0'">
@@ -49,6 +50,9 @@
 		<Reference Include="UnityEngine.AssetBundleModule">
 			<HintPath>..\..\libs\Proxies\UnityEngine.AssetBundleModule.dll</HintPath>
 		</Reference>
+		<Reference Include="UnityEngine.TextRenderingModule">
+			<HintPath>..\..\libs\Proxies\UnityEngine.TextRenderingModule.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -65,7 +69,8 @@
 
 	<ItemGroup>
 		<EmbeddedResource Update="Properties\Resources.resx">
-			<Generator>ResXFileCodeGenerator</Generator>
+			<Generator Condition="'$(TargetFramework)'=='net35'">ResXFileCodeGenerator</Generator>
+			<Generator Condition="'$(TargetFramework)'=='net6.0'">ResXFileCodeGenerator</Generator>
 			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
 	</ItemGroup>

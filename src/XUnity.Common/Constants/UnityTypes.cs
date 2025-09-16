@@ -10,6 +10,7 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using XUnity.Common.Logging;
 using XUnity.Common.Utilities;
+using XUnity.Common.Compatibility;
 
 #if IL2CPP
 using Il2CppInterop.Runtime;
@@ -519,6 +520,14 @@ namespace XUnity.Common.Constants
 
          try
          {
+            // 使用新的IL2CPP类型解析器
+            var typeContainer = IL2CPPTypeResolver.ResolveType( name );
+            if( typeContainer != null )
+            {
+               return typeContainer;
+            }
+
+            // 如果新解析器失败，回退到原有逻辑
             string @namespace = string.Empty;
             string typeName = null;
 
@@ -575,21 +584,36 @@ namespace XUnity.Common.Constants
 #else
       private static TypeContainer FindType( string name )
       {
-         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-         foreach( var assembly in assemblies )
+         try
          {
-            try
+            // 使用新的IL2CPP类型解析器（在Mono环境下也会工作）
+            var typeContainer = IL2CPPTypeResolver.ResolveType( name );
+            if( typeContainer != null )
             {
-               var type = assembly.GetType( name, false );
-               if(type != null)
+               return typeContainer;
+            }
+
+            // 如果新解析器失败，回退到原有逻辑
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach( var assembly in assemblies )
+            {
+               try
                {
-                  return new TypeContainer( type );
+                  var type = assembly.GetType( name, false );
+                  if(type != null)
+                  {
+                     return new TypeContainer( type );
+                  }
+               }
+               catch
+               {
+                  // don't care!
                }
             }
-            catch
-            {
-               // don't care!
-            }
+         }
+         catch( Exception e )
+         {
+            XuaLogger.AutoTranslator.Debug( e, "解析类型时发生错误: " + name );
          }
 
          return null;
