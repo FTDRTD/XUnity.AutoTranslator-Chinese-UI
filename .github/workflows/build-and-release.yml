@@ -55,10 +55,6 @@ jobs:
             target: net35
             output-name: XUnity.AutoTranslator-UnityInjector
             config: Release
-          - project: XUnity.AutoTranslator.Setup
-            target: net40
-            output-name: XUnity.AutoTranslator-ReiPatcher
-            config: Release
 
     steps:
     - name: Checkout code
