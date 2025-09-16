@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using XUnity.Common.Logging;
 using XUnity.Common.Utilities;
 
 namespace XUnity.AutoTranslator.Plugin.Core.UI

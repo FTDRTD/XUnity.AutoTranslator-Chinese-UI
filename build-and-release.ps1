@@ -124,19 +124,15 @@ try {
         $targetFramework = $build.target
         $config = $build.config
         $outputDir = Join-Path $DistDirectory $outputName
-        
+
         Write-Host "Packaging $outputName..."
         New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
-
-        # Copy main build outputs
-        Copy-Item "src\$projectName\bin\$config\$targetFramework\*.dll" $outputDir -ErrorAction SilentlyContinue
-        Copy-Item "src\$projectName\bin\$config\$targetFramework\*.pdb" $outputDir -ErrorAction SilentlyContinue
-        Copy-Item "src\$projectName\bin\$config\$targetFramework\*.xml" $outputDir -ErrorAction SilentlyContinue
 
         # Special packaging for BepInEx versions
         if ($outputName -match "BepInEx") {
             Write-Host "  Applying BepInEx packaging rules for $outputName..."
-            
+            Write-Host "  Only including BepInEx folder for clean distribution..."
+
             $bepInExDir = Join-Path $outputDir "BepInEx"
             $null = New-Item -ItemType Directory -Path (Join-Path $bepInExDir "core") -Force
             $null = New-Item -ItemType Directory -Path (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator") -Force
@@ -150,32 +146,37 @@ try {
             Copy-Item "src\XUnity.AutoTranslator.Plugin.Core\bin\Release\$dependencyFramework\XUnity.AutoTranslator.Plugin.Core.dll" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
             Copy-Item "src\XUnity.AutoTranslator.Plugin.ExtProtocol\bin\Release\net35\XUnity.AutoTranslator.Plugin.ExtProtocol.dll" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
             Copy-Item "src\$projectName\bin\$config\$targetFramework\$projectName.dll" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
-            Copy-Item "src\$projectName\bin\$config\$targetFramework\$projectName.pdb" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\") -ErrorAction SilentlyContinue
-            
+
             Copy-Item "libs\BepInEx 5.0\BepInEx.dll" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
             Copy-Item "libs\ExIni.dll" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
+        }
+        else {
+            # For non-BepInEx packages, copy all files normally
+            Copy-Item "src\$projectName\bin\$config\$targetFramework\*.dll" $outputDir -ErrorAction SilentlyContinue
+            Copy-Item "src\$projectName\bin\$config\$targetFramework\*.pdb" $outputDir -ErrorAction SilentlyContinue
+            Copy-Item "src\$projectName\bin\$config\$targetFramework\*.xml" $outputDir -ErrorAction SilentlyContinue
         }
 
         # Create ZIP archive
         $zipName = "$outputName-$Version.zip"
         $zipPath = Join-Path $DistDirectory $zipName
-        
+
         Compress-Archive -Path "$outputDir\*" -DestinationPath $zipPath -Force
-        
+
         Write-Host "  Created ZIP package: $zipPath"
         $allZipFiles.Add($zipPath)
     }
 
     # 5. Create GitHub Release
     Write-SectionHeader "5. Creating GitHub Release v$Version..."
-    
+
     if ($allZipFiles.Count -eq 0) {
         throw "No ZIP files found to upload."
     }
 
     # Use GitHub CLI to create the release and upload files
     gh release create "v$Version" --generate-notes --title "Release v$Version" $allZipFiles
-    
+
     if ($LASTEXITCODE -ne 0) { throw "GitHub release creation failed." }
 
     Write-SectionHeader "SUCCESS! Release v$Version has been created successfully."
