@@ -97,20 +97,20 @@ jobs:
             --configuration ${{ matrix.config }} `
             --framework $targetFramework `
             --no-restore `
-            -p:Version=${{ github.event.inputs.version || '5.4.5' }}
+            -p:Version=${{ github.event.inputs.version || '5.4.5' }} /p:PostBuildEvent=""
 
       - name: Build dependent projects
         run: |
           # Build XUnity.Common
-          dotnet build src/XUnity.Common/XUnity.Common.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }} -p:VersionCommon=1.0.3
+          dotnet build src/XUnity.Common/XUnity.Common.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }} -p:VersionCommon=1.0.3 /p:PostBuildEvent=""
 
           # Build XUnity.ResourceRedirector
-          dotnet build src/XUnity.ResourceRedirector/XUnity.ResourceRedirector.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }} -p:VersionRedirector=2.1.0
+          dotnet build src/XUnity.ResourceRedirector/XUnity.ResourceRedirector.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }} -p:VersionRedirector=2.1.0 /p:PostBuildEvent=""
 
           # Build XUnity.AutoTranslator.Plugin.Core
-          dotnet build src/XUnity.AutoTranslator.Plugin.Core/XUnity.AutoTranslator.Plugin.Core.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }}
+          dotnet build src/XUnity.AutoTranslator.Plugin.Core/XUnity.AutoTranslator.Plugin.Core.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }} /p:PostBuildEvent=""
 
-          # Build ExtProtocol and disable its post-build event to prevent the XCOPY error
+          # Build ExtProtocol
           dotnet build src/XUnity.AutoTranslator.Plugin.ExtProtocol/XUnity.AutoTranslator.Plugin.ExtProtocol.csproj --configuration ${{ matrix.config }} --framework net35 -p:VersionExtProtocol=1.0.1 /p:PostBuildEvent=""
 
       - name: Copy build outputs
@@ -128,7 +128,8 @@ jobs:
             Copy-Item "src/XUnity.Common/bin/${{ matrix.config }}/${{ matrix.target }}/XUnity.Common.dll" $outputDir -ErrorAction SilentlyContinue
             Copy-Item "src/XUnity.ResourceRedirector/bin/${{ matrix.config }}/${{ matrix.target }}/XUnity.ResourceRedirector.dll" $outputDir -ErrorAction SilentlyContinue
             Copy-Item "src/XUnity.AutoTranslator.Plugin.Core/bin/${{ matrix.config }}/${{ matrix.target }}/XUnity.AutoTranslator.Plugin.Core.dll" $outputDir -ErrorAction SilentlyContinue
-            Copy-Item "src/XUnity.AutoTranslator.Plugin.ExtProtocol/bin/${{ matrix.config }}/net35/XUnity.AutoTranslator.Plugin.ExtProtocol.dll" $outputDir -ErrorAction SilentlyContinue
+            # This path needs correction, it should reflect the correct output path for ExtProtocol
+            Copy-Item "src/XUnity.AutoTranslator.Plugin.ExtProtocol/bin/Release/net35/XUnity.AutoTranslator.Plugin.ExtProtocol.dll" $outputDir -ErrorAction SilentlyContinue
 
             # Copy BepInEx structure
             $bepInExDir = "$outputDir/BepInEx"
