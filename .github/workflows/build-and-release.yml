@@ -76,6 +76,20 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
+    - name: Install .NET Framework 3.5 Developer Pack
+      if: matrix.target == 'net35'
+      run: |
+        # Check if .NET Framework 3.5 is already installed
+        $net35Installed = Get-WindowsOptionalFeature -Online -FeatureName NetFx3 -ErrorAction SilentlyContinue
+
+        if ($net35Installed -and $net35Installed.State -eq "Enabled") {
+          Write-Host ".NET Framework 3.5 is already installed"
+        } else {
+          Write-Host "Enabling .NET Framework 3.5..."
+          Enable-WindowsOptionalFeature -Online -FeatureName NetFx3 -All -NoRestart
+          Write-Host ".NET Framework 3.5 enabled successfully"
+        }
+
     - name: Restore dependencies
       run: dotnet restore src/${{ matrix.project }}/${{ matrix.project }}.csproj
 
