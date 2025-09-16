@@ -142,9 +142,12 @@ try {
             $null = New-Item -ItemType Directory -Path (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator") -Force
             $null = New-Item -ItemType Directory -Path (Join-Path $bepInExDir "plugins\XUnity.ResourceRedirector") -Force
 
-            Copy-Item "src\XUnity.Common\bin\Release\$targetFramework\XUnity.Common.dll" (Join-Path $bepInExDir "core\")
-            Copy-Item "src\XUnity.ResourceRedirector\bin\Release\$targetFramework\XUnity.ResourceRedirector.dll" (Join-Path $bepInExDir "plugins\XUnity.ResourceRedirector\")
-            Copy-Item "src\XUnity.AutoTranslator.Plugin.Core\bin\Release\$targetFramework\XUnity.AutoTranslator.Plugin.Core.dll" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
+            # For IL2CPP versions, use net6.0; for others, use net35
+            $dependencyFramework = if ($targetFramework -eq "net6.0") { "net6.0" } else { "net35" }
+
+            Copy-Item "src\XUnity.Common\bin\Release\$dependencyFramework\XUnity.Common.dll" (Join-Path $bepInExDir "core\")
+            Copy-Item "src\XUnity.ResourceRedirector\bin\Release\$dependencyFramework\XUnity.ResourceRedirector.dll" (Join-Path $bepInExDir "plugins\XUnity.ResourceRedirector\")
+            Copy-Item "src\XUnity.AutoTranslator.Plugin.Core\bin\Release\$dependencyFramework\XUnity.AutoTranslator.Plugin.Core.dll" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
             Copy-Item "src\XUnity.AutoTranslator.Plugin.ExtProtocol\bin\Release\net35\XUnity.AutoTranslator.Plugin.ExtProtocol.dll" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
             Copy-Item "src\$projectName\bin\$config\$targetFramework\$projectName.dll" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\")
             Copy-Item "src\$projectName\bin\$config\$targetFramework\$projectName.pdb" (Join-Path $bepInExDir "plugins\XUnity.AutoTranslator\") -ErrorAction SilentlyContinue
