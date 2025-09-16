@@ -1,20 +1,43 @@
-﻿<PropertyGroup>
-	<Authors>gravydevsupreme, Bepis, others at https://github.com/bbepis/XUnity.AutoTranslator</Authors>
-	<Copyright>Copyright © 2018 / MIT License</Copyright>
-	<PackageReleaseNotes>https://github.com/bbepis/XUnity.AutoTranslator/blob/master/CHANGELOG.md</PackageReleaseNotes>
-	<PackageProjectUrl>https://github.com/bbepis/XUnity.AutoTranslator</PackageProjectUrl>
-	<PackageLicenseExpression>MIT</PackageLicenseExpression>
-	<PackageTags>unity;xunity</PackageTags>
-</PropertyGroup>
-
-<Target Name="AddGeneratedFile" BeforeTargets="BeforeCompile;CoreCompile" Inputs="$(MSBuildAllProjects)" Outputs="$(IntermediateOutputPath)GeneratedFile.cs">
+﻿<Project>
+	<!-- Use these properties to change version numbers globally -->
 	<PropertyGroup>
-		<GeneratedText><![CDATA[namespace $(RootNamespace) { internal static class GeneratedInfo { public const string PROJECT_VERSION = "$(Version)"%3B } }]]></GeneratedText>
-		<GeneratedFilePath>$(IntermediateOutputPath)GeneratedInfo.cs</GeneratedFilePath>
+		<!-- Plugin version -->
+		<Version>5.4.5</Version>
+		<!-- XUnity.Common version -->
+		<VersionCommon>1.0.3</VersionCommon>
+		<!-- XUnity.AutoTranslator.Plugin.ExtProtocol version -->
+		<VersionExtProtocol>1.0.1</VersionExtProtocol>
+		<!-- XUnity.ResourceRedirector version -->
+		<VersionRedirector>2.1.0</VersionRedirector>
 	</PropertyGroup>
-	<ItemGroup>
-		<Compile Include="$(GeneratedFilePath)" />
-		<FileWrites Include="$(GeneratedFilePath)" />
-	</ItemGroup>
-	<WriteLinesToFile Lines="$(GeneratedText)" File="$(GeneratedFilePath)" Overwrite="true" />
-</Target>
+
+	<PropertyGroup>
+		<Authors>gravydevsupreme, Bepis, others at https://github.com/bbepis/XUnity.AutoTranslator</Authors>
+		<Copyright>Copyright © 2018 / MIT License</Copyright>
+		<PackageReleaseNotes>https://github.com/bbepis/XUnity.AutoTranslator/blob/master/CHANGELOG.md</PackageReleaseNotes>
+		<PackageProjectUrl>https://github.com/bbepis/XUnity.AutoTranslator</PackageProjectUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageTags>unity;xunity</PackageTags>
+	</PropertyGroup>
+
+    <!-- 
+        *** 关键修复代码 ***
+        这个属性组会在 GitHub Actions 环境中自动禁用所有项目的构建后事件 (PostBuildEvent)。
+        这可以彻底解决由于 XCOPY 命令路径错误导致的构建失败问题。
+    -->
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <PostBuildEvent></PostBuildEvent>
+    </PropertyGroup>
+
+	<Target Name="AddGeneratedFile" BeforeTargets="BeforeCompile;CoreCompile" Inputs="$(MSBuildAllProjects)" Outputs="$(IntermediateOutputPath)GeneratedFile.cs">
+		<PropertyGroup>
+			<GeneratedText><![CDATA[namespace $(RootNamespace) { internal static class GeneratedInfo { public const string PROJECT_VERSION = "$(Version)"%3B } }]]></GeneratedText>
+			<GeneratedFilePath>$(IntermediateOutputPath)GeneratedInfo.cs</GeneratedFilePath>
+		</PropertyGroup>
+		<ItemGroup>
+			<Compile Include="$(GeneratedFilePath)" />
+			<FileWrites Include="$(GeneratedFilePath)" />
+		</ItemGroup>
+		<WriteLinesToFile Lines="$(GeneratedText)" File="$(GeneratedFilePath)" Overwrite="true" />
+	</Target>
+</Project>

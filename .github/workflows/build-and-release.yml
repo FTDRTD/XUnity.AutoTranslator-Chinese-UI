@@ -31,7 +31,6 @@ jobs:
             target: net6.0
             output-name: XUnity.AutoTranslator-BepInEx-IL2CPP
             config: Release
-
           # Developer versions
           - project: XUnity.AutoTranslator.Plugin.Core
             target: net35
@@ -41,7 +40,6 @@ jobs:
             target: net6.0
             output-name: XUnity.AutoTranslator-Developer-IL2CPP
             config: Release
-
           # Other injectors
           - project: XUnity.AutoTranslator.Plugin.IPA
             target: net35
@@ -75,9 +73,7 @@ jobs:
       - name: Install .NET Framework 3.5 Developer Pack
         if: matrix.target == 'net35'
         run: |
-          # Check if .NET Framework 3.5 is already installed
           $net35Installed = Get-WindowsOptionalFeature -Online -FeatureName NetFx3 -ErrorAction SilentlyContinue
-
           if ($net35Installed -and $net35Installed.State -eq "Enabled") {
             Write-Host ".NET Framework 3.5 is already installed"
           } else {
@@ -92,57 +88,41 @@ jobs:
       - name: Build project
         run: |
           $targetFramework = "${{ matrix.target }}"
-
           dotnet build src/${{ matrix.project }}/${{ matrix.project }}.csproj `
             --configuration ${{ matrix.config }} `
             --framework $targetFramework `
             --no-restore `
-            -p:Version=${{ github.event.inputs.version || '5.4.5' }} /p:PostBuildEvent=""
+            -p:Version=${{ github.event.inputs.version || '5.4.5' }}
 
       - name: Build dependent projects
         run: |
-          # Build XUnity.Common
-          dotnet build src/XUnity.Common/XUnity.Common.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }} -p:VersionCommon=1.0.3 /p:PostBuildEvent=""
-
-          # Build XUnity.ResourceRedirector
-          dotnet build src/XUnity.ResourceRedirector/XUnity.ResourceRedirector.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }} -p:VersionRedirector=2.1.0 /p:PostBuildEvent=""
-
-          # Build XUnity.AutoTranslator.Plugin.Core
-          dotnet build src/XUnity.AutoTranslator.Plugin.Core/XUnity.AutoTranslator.Plugin.Core.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }} /p:PostBuildEvent=""
-
-          # Build ExtProtocol
-          dotnet build src/XUnity.AutoTranslator.Plugin.ExtProtocol/XUnity.AutoTranslator.Plugin.ExtProtocol.csproj --configuration ${{ matrix.config }} --framework net35 -p:VersionExtProtocol=1.0.1 /p:PostBuildEvent=""
+          # No PostBuildEvent parameters are needed here anymore,
+          # because the Directory.Build.props file handles it.
+          dotnet build src/XUnity.Common/XUnity.Common.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }} -p:VersionCommon=1.0.3
+          dotnet build src/XUnity.ResourceRedirector/XUnity.ResourceRedirector.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }} -p:VersionRedirector=2.1.0
+          dotnet build src/XUnity.AutoTranslator.Plugin.Core/XUnity.AutoTranslator.Plugin.Core.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }}
+          dotnet build src/XUnity.AutoTranslator.Plugin.ExtProtocol/XUnity.AutoTranslator.Plugin.ExtProtocol.csproj --configuration ${{ matrix.config }} --framework net35 -p:VersionExtProtocol=1.0.1
 
       - name: Copy build outputs
         run: |
           $outputDir = "dist/${{ matrix.output-name }}"
           New-Item -ItemType Directory -Force -Path $outputDir
-
-          # Copy main DLLs
           Copy-Item "src/${{ matrix.project }}/bin/${{ matrix.config }}/${{ matrix.target }}/*.dll" $outputDir -ErrorAction SilentlyContinue
           Copy-Item "src/${{ matrix.project }}/bin/${{ matrix.config }}/${{ matrix.target }}/*.pdb" $outputDir -ErrorAction SilentlyContinue
           Copy-Item "src/${{ matrix.project }}/bin/${{ matrix.config }}/${{ matrix.target }}/*.xml" $outputDir -ErrorAction SilentlyContinue
-
-          # Copy dependencies based on project type
           if ("${{ matrix.project }}" -match "BepInEx") {
             Copy-Item "src/XUnity.Common/bin/${{ matrix.config }}/${{ matrix.target }}/XUnity.Common.dll" $outputDir -ErrorAction SilentlyContinue
             Copy-Item "src/XUnity.ResourceRedirector/bin/${{ matrix.config }}/${{ matrix.target }}/XUnity.ResourceRedirector.dll" $outputDir -ErrorAction SilentlyContinue
             Copy-Item "src/XUnity.AutoTranslator.Plugin.Core/bin/${{ matrix.config }}/${{ matrix.target }}/XUnity.AutoTranslator.Plugin.Core.dll" $outputDir -ErrorAction SilentlyContinue
-            # This path needs correction, it should reflect the correct output path for ExtProtocol
             Copy-Item "src/XUnity.AutoTranslator.Plugin.ExtProtocol/bin/Release/net35/XUnity.AutoTranslator.Plugin.ExtProtocol.dll" $outputDir -ErrorAction SilentlyContinue
-
-            # Copy BepInEx structure
             $bepInExDir = "$outputDir/BepInEx"
             New-Item -ItemType Directory -Force -Path "$bepInExDir/core" -ErrorAction SilentlyContinue
             New-Item -ItemType Directory -Force -Path "$bepInExDir/plugins/XUnity.AutoTranslator" -ErrorAction SilentlyContinue
             New-Item -ItemType Directory -Force -Path "$bepInExDir/plugins/XUnity.ResourceRedirector" -ErrorAction SilentlyContinue
-
             Copy-Item "$outputDir/XUnity.Common.dll" "$bepInExDir/core/" -ErrorAction SilentlyContinue
             Copy-Item "$outputDir/XUnity.ResourceRedirector.dll" "$bepInExDir/plugins/XUnity.ResourceRedirector/" -ErrorAction SilentlyContinue
             Copy-Item "$outputDir/*.dll" "$bepInExDir/plugins/XUnity.AutoTranslator/" -ErrorAction SilentlyContinue
             Copy-Item "$outputDir/*.pdb" "$bepInExDir/plugins/XUnity.AutoTranslator/" -ErrorAction SilentlyContinue
-
-            # Copy libs
             Copy-Item "libs/BepInEx 5.0/BepInEx.dll" "$bepInExDir/plugins/XUnity.AutoTranslator/" -ErrorAction SilentlyContinue
             Copy-Item "libs/ExIni.dll" "$bepInExDir/plugins/XUnity.AutoTranslator/" -ErrorAction SilentlyContinue
           }
@@ -152,7 +132,6 @@ jobs:
           $version = "${{ github.event.inputs.version || '5.4.5' }}"
           $zipName = "${{ matrix.output-name }}-${version}.zip"
           $sourceDir = "dist/${{ matrix.output-name }}"
-
           if (Test-Path $sourceDir) {
             Compress-Archive -Path "$sourceDir/*" -DestinationPath "dist/$zipName" -Force
           }
@@ -167,16 +146,13 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -191,16 +167,13 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
