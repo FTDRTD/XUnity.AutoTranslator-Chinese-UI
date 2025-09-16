@@ -82,26 +82,22 @@ jobs:
             Write-Host ".NET Framework 3.5 enabled successfully"
           }
 
-      - name: Restore dependencies
-        run: dotnet restore src/${{ matrix.project }}/${{ matrix.project }}.csproj
+      - name: Restore all solution dependencies
+        run: dotnet restore src/XUnity.AutoTranslator.sln
 
       - name: Build project
         run: |
           $targetFramework = "${{ matrix.target }}"
+          # 关键修复：添加 /p:NoWarn=NU1702 来抑制 .NET Core -> .NET Framework 的引用警告，
+          # 这个警告是导致构建在没有错误的情况下被“取消”的原因。
           dotnet build src/${{ matrix.project }}/${{ matrix.project }}.csproj `
             --configuration ${{ matrix.config }} `
             --framework $targetFramework `
             --no-restore `
-            -p:Version=${{ github.event.inputs.version || '5.4.5' }}
+            -p:Version=${{ github.event.inputs.version || '5.4.5' }} /p:NoWarn=NU1702
 
-      - name: Build dependent projects
-        run: |
-          # No PostBuildEvent parameters are needed here anymore,
-          # because the Directory.Build.props file handles it.
-          dotnet build src/XUnity.Common/XUnity.Common.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }} -p:VersionCommon=1.0.3
-          dotnet build src/XUnity.ResourceRedirector/XUnity.ResourceRedirector.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }} -p:VersionRedirector=2.1.0
-          dotnet build src/XUnity.AutoTranslator.Plugin.Core/XUnity.AutoTranslator.Plugin.Core.csproj --configuration ${{ matrix.config }} --framework ${{ matrix.target }}
-          dotnet build src/XUnity.AutoTranslator.Plugin.ExtProtocol/XUnity.AutoTranslator.Plugin.ExtProtocol.csproj --configuration ${{ matrix.config }} --framework net35 -p:VersionExtProtocol=1.0.1
+      # 注意：不再需要 "Build dependent projects" 步骤，因为上面的命令会自动构建所有依赖项，
+      # 并且 Directory.Build.props 文件会处理它们的 PostBuildEvent。
 
       - name: Copy build outputs
         run: |
@@ -111,18 +107,29 @@ jobs:
           Copy-Item "src/${{ matrix.project }}/bin/${{ matrix.config }}/${{ matrix.target }}/*.pdb" $outputDir -ErrorAction SilentlyContinue
           Copy-Item "src/${{ matrix.project }}/bin/${{ matrix.config }}/${{ matrix.target }}/*.xml" $outputDir -ErrorAction SilentlyContinue
           if ("${{ matrix.project }}" -match "BepInEx") {
-            Copy-Item "src/XUnity.Common/bin/${{ matrix.config }}/${{ matrix.target }}/XUnity.Common.dll" $outputDir -ErrorAction SilentlyContinue
-            Copy-Item "src/XUnity.ResourceRedirector/bin/${{ matrix.config }}/${{ matrix.target }}/XUnity.ResourceRedirector.dll" $outputDir -ErrorAction SilentlyContinue
-            Copy-Item "src/XUnity.AutoTranslator.Plugin.Core/bin/${{ matrix.config }}/${{ matrix.target }}/XUnity.AutoTranslator.Plugin.Core.dll" $outputDir -ErrorAction SilentlyContinue
+            # BepInEx build requires all dependencies to be copied and structured correctly.
+            # We need to build them explicitly to ensure they are available for copying.
+            # Building them here is safe because the main build has already completed.
+            dotnet build src/XUnity.Common/XUnity.Common.csproj --configuration Release --framework ${{ matrix.target }}
+            dotnet build src/XUnity.ResourceRedirector/XUnity.ResourceRedirector.csproj --configuration Release --framework ${{ matrix.target }}
+            dotnet build src/XUnity.AutoTranslator.Plugin.Core/XUnity.AutoTranslator.Plugin.Core.csproj --configuration Release --framework ${{ matrix.target }}
+            dotnet build src/XUnity.AutoTranslator.Plugin.ExtProtocol/XUnity.AutoTranslator.Plugin.ExtProtocol.csproj --configuration Release --framework net35
+            
+            Copy-Item "src/XUnity.Common/bin/Release/${{ matrix.target }}/XUnity.Common.dll" $outputDir -ErrorAction SilentlyContinue
+            Copy-Item "src/XUnity.ResourceRedirector/bin/Release/${{ matrix.target }}/XUnity.ResourceRedirector.dll" $outputDir -ErrorAction SilentlyContinue
+            Copy-Item "src/XUnity.AutoTranslator.Plugin.Core/bin/Release/${{ matrix.target }}/XUnity.AutoTranslator.Plugin.Core.dll" $outputDir -ErrorAction SilentlyContinue
             Copy-Item "src/XUnity.AutoTranslator.Plugin.ExtProtocol/bin/Release/net35/XUnity.AutoTranslator.Plugin.ExtProtocol.dll" $outputDir -ErrorAction SilentlyContinue
+            
             $bepInExDir = "$outputDir/BepInEx"
             New-Item -ItemType Directory -Force -Path "$bepInExDir/core" -ErrorAction SilentlyContinue
             New-Item -ItemType Directory -Force -Path "$bepInExDir/plugins/XUnity.AutoTranslator" -ErrorAction SilentlyContinue
             New-Item -ItemType Directory -Force -Path "$bepInExDir/plugins/XUnity.ResourceRedirector" -ErrorAction SilentlyContinue
+            
             Copy-Item "$outputDir/XUnity.Common.dll" "$bepInExDir/core/" -ErrorAction SilentlyContinue
             Copy-Item "$outputDir/XUnity.ResourceRedirector.dll" "$bepInExDir/plugins/XUnity.ResourceRedirector/" -ErrorAction SilentlyContinue
             Copy-Item "$outputDir/*.dll" "$bepInExDir/plugins/XUnity.AutoTranslator/" -ErrorAction SilentlyContinue
             Copy-Item "$outputDir/*.pdb" "$bepInExDir/plugins/XUnity.AutoTranslator/" -ErrorAction SilentlyContinue
+            
             Copy-Item "libs/BepInEx 5.0/BepInEx.dll" "$bepInExDir/plugins/XUnity.AutoTranslator/" -ErrorAction SilentlyContinue
             Copy-Item "libs/ExIni.dll" "$bepInExDir/plugins/XUnity.AutoTranslator/" -ErrorAction SilentlyContinue
           }
