@@ -83,21 +83,18 @@ jobs:
           }
 
       - name: Restore all solution dependencies
-        run: dotnet restore src/XUnity.AutoTranslator.sln
+        # 关键修复：移除了错误的 'src/' 路径。解决方案文件位于根目录。
+        run: dotnet restore XUnity.AutoTranslator.sln
 
       - name: Build project
         run: |
           $targetFramework = "${{ matrix.target }}"
-          # 关键修复：添加 /p:NoWarn=NU1702 来抑制 .NET Core -> .NET Framework 的引用警告，
-          # 这个警告是导致构建在没有错误的情况下被“取消”的原因。
+          # 保留 NoWarn=NU1702 来处理跨框架引用的警告
           dotnet build src/${{ matrix.project }}/${{ matrix.project }}.csproj `
             --configuration ${{ matrix.config }} `
             --framework $targetFramework `
             --no-restore `
             -p:Version=${{ github.event.inputs.version || '5.4.5' }} /p:NoWarn=NU1702
-
-      # 注意：不再需要 "Build dependent projects" 步骤，因为上面的命令会自动构建所有依赖项，
-      # 并且 Directory.Build.props 文件会处理它们的 PostBuildEvent。
 
       - name: Copy build outputs
         run: |
@@ -107,13 +104,10 @@ jobs:
           Copy-Item "src/${{ matrix.project }}/bin/${{ matrix.config }}/${{ matrix.target }}/*.pdb" $outputDir -ErrorAction SilentlyContinue
           Copy-Item "src/${{ matrix.project }}/bin/${{ matrix.config }}/${{ matrix.target }}/*.xml" $outputDir -ErrorAction SilentlyContinue
           if ("${{ matrix.project }}" -match "BepInEx") {
-            # BepInEx build requires all dependencies to be copied and structured correctly.
-            # We need to build them explicitly to ensure they are available for copying.
-            # Building them here is safe because the main build has already completed.
-            dotnet build src/XUnity.Common/XUnity.Common.csproj --configuration Release --framework ${{ matrix.target }}
-            dotnet build src/XUnity.ResourceRedirector/XUnity.ResourceRedirector.csproj --configuration Release --framework ${{ matrix.target }}
-            dotnet build src/XUnity.AutoTranslator.Plugin.Core/XUnity.AutoTranslator.Plugin.Core.csproj --configuration Release --framework ${{ matrix.target }}
-            dotnet build src/XUnity.AutoTranslator.Plugin.ExtProtocol/XUnity.AutoTranslator.Plugin.ExtProtocol.csproj --configuration Release --framework net35
+            # 显式地重新构建所有依赖项，以确保它们在正确的输出目录中可用
+            dotnet build src/XUnity.Common/XUnity.Common.csproj --configuration Release --framework ${{ matrix.target }} /p:NoWarn=NU1702
+            dotnet build src/XUnity.ResourceRedirector/XUnity.ResourceRedirector.csproj --configuration Release --framework ${{ matrix.target }} /p:NoWarn=NU1702
+            dotnet build src/XUnity.AutoTranslator.Plugin.Core/XUnity.AutoTranslator.Plugin.Core.csproj --configuration Release --framework ${{ matrix.target }} /p:NoWarn=NU1702
             
             Copy-Item "src/XUnity.Common/bin/Release/${{ matrix.target }}/XUnity.Common.dll" $outputDir -ErrorAction SilentlyContinue
             Copy-Item "src/XUnity.ResourceRedirector/bin/Release/${{ matrix.target }}/XUnity.ResourceRedirector.dll" $outputDir -ErrorAction SilentlyContinue
